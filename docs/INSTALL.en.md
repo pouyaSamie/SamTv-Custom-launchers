@@ -12,10 +12,10 @@ On the SAM TV we tested, Developer options are hidden from the normal Settings m
 
 1. Install and open [**Activity Launcher from F-Droid**](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) on the TV. Do not confuse it with TV Launcher or similarly named apps.
 2. Search for **`DevelopmentActivity`**. Its identifier is **`system.development.developmentActivity`**. Open that entry.
-3. If the main **Developer options** switch is off, turn it on. Then enable **network ADB debugging**. The name of the ADB option may vary by firmware. Change only the ADB setting needed for connection.
+3. Turn on **Developer Mode** and **USB Debugging**. Those were the only two settings needed for the connection on the TV we tested.
 4. Find and note the TV's **IP address** in network settings. An example is `192.168.1.50`.
 
-Activity Launcher only opens the hidden settings screen; it does not turn options on for you. If the activity or ADB option is missing, stop and report your TV model instead of trying this installer.
+Activity Launcher only opens the hidden settings screen; it does not turn options on for you. If `DevelopmentActivity` or **USB Debugging** is missing, stop and report your TV model instead of trying this installer.
 
 ## 2. Install from your computer
 
@@ -38,7 +38,7 @@ Use the physical TV remote:
 2. Press **Source/Input**, select an HDMI port, and press **OK once**. The picture from that input should appear.
 3. Press the **four-color** button. TV Settings should open. You can later change this button in **Remote Buttons**.
 
-Open **Choose Home** to pick another launcher. If you want Projectivy or another launcher, install it separately from the TV's app store and then select it in Choose Home. Repeat the three button checks after restarting the TV.
+Open **Choose Home** to pick another launcher. We recommend **Projectivy Launcher**; see its [official Google Play page](https://play.google.com/store/apps/details?id=com.spocky.projengmenu) and example image in the [README](../README.md#tested-launchers). Install it separately and then select it in Choose Home. Repeat the three button checks after restarting the TV.
 
 ## If setup fails or you want to undo it
 

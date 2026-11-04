@@ -22,7 +22,7 @@
 
 ۱. فایل مناسب رایانه‌تان، **`SAM-TV-v0.1.4-windows.zip`** یا **`SAM-TV-v0.1.4-linux.tar.gz`**، را از بخش Releases دریافت و از حالت فشرده خارج کنید.
 
-۲. برنامهٔ [**Activity Launcher** در F-Droid](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) را روی تلویزیون نصب و باز کنید. `DevelopmentActivity` را جست‌وجو کنید؛ شناسهٔ آن `system.development.developmentActivity` است. آن صفحه را باز و اشکال‌زدایی ADB از طریق شبکه را فعال کنید. سپس آدرس IP تلویزیون را از تنظیمات شبکه یادداشت کنید. [توضیح بیشتر](docs/INSTALL.fa.md) در راهنمای نصب آمده است.
+۲. برنامهٔ [**Activity Launcher** در F-Droid](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) را روی تلویزیون نصب و باز کنید. `DevelopmentActivity` را جست‌وجو کنید؛ شناسهٔ آن `system.development.developmentActivity` است. در آن صفحه فقط **Developer Mode** و **USB Debugging** را روشن کنید. سپس آدرس IP تلویزیون را از تنظیمات شبکه یادداشت کنید. [توضیح بیشتر](docs/INSTALL.fa.md) در راهنمای نصب آمده است.
 
 ۳. در ویندوز روی **`Install-SAM-TV.cmd`** دوبار کلیک کنید. در لینوکس فایل اجرایی **`Install-SAM-TV`** را اجرا کنید.
 
@@ -32,9 +32,27 @@
 
 اگر در هر مرحله پیام ناسازگاری دیدید، نصب را به‌زور ادامه ندهید. اگر بعد از نصب دکمه‌ای درست کار نکرد، روش بازگرداندن تنظیم قبلی در [راهنمای نصب و بازیابی](docs/INSTALL.fa.md) آمده است.
 
-## لانچر دلخواه
+## لانچرهای تست‌شده
 
-در **Choose Home** می‌توانید لانچرهای نصب‌شده را ببینید و یکی را برای دکمهٔ Home انتخاب کنید. گزینهٔ **Install new launcher** جست‌وجوی لانچر را در Play Store تلویزیون باز می‌کند. Projectivy جزو فایل‌های این بسته نیست؛ اگر آن را می‌خواهید، جداگانه از فروشگاه تلویزیون نصب و سپس در Choose Home انتخاب کنید.
+**[Projectivy Launcher](https://play.google.com/store/apps/details?id=com.spocky.projengmenu) — تست شده و پیشنهاد ما.** ظاهر مرتب‌تری دارد. داخل بسته نیست؛ آن را جداگانه نصب کنید و سپس در **Choose Home** انتخاب کنید.
+
+<img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="520" alt="نمای عمومی Projectivy Launcher از صفحهٔ رسمی برنامه در Google Play">
+
+*تصویر نمونه از [صفحهٔ Projectivy در Google Play](https://play.google.com/store/apps/details?id=com.spocky.projengmenu)؛ چیدمان برنامه‌ها و تصویر پس‌زمینهٔ تلویزیون شما ممکن است فرق کند.*
+
+**[صفحهٔ اصلی Android TV گوگل](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher) — تست شده.** این گزینه از ابتدا روی تلویزیون نصب بود.
+
+<img src="https://play-lh.googleusercontent.com/kmvrlAqiL1m2HV91XvR5lP8g7h9AXx1VB2jPIWdpVUIRo2F93o5nSyJ65naRBsXvl-M3z-H5kM6mnh5Dadpx=w1052-h592" width="520" alt="نمای عمومی Android TV Home از صفحهٔ رسمی گوگل">
+
+*تصویر نمونه از [صفحهٔ Android TV Home در Google Play](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher).*
+
+**[LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher) — تست شده.** این لانچر جداگانه نصب می‌شود.
+
+<img src="https://raw.githubusercontent.com/leanbitlab-org/LtvLauncher/master/docs/images/screenshot_1.png" width="520" alt="نمای عمومی LTvLauncher از مخزن رسمی سازنده">
+
+*تصویر نمونه از [مخزن رسمی LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher).*
+
+در **Choose Home** می‌توانید هر لانچر نصب‌شدهٔ سازگار را برای دکمهٔ Home انتخاب کنید. گزینهٔ **Install new launcher** جست‌وجوی لانچر را در Play Store تلویزیون باز می‌کند.
 
 برای جزئیات بیشتر [راهنمای نصب و بازیابی](docs/INSTALL.fa.md) را بخوانید. [متن انگلیسی](README.md) هم در همین بسته موجود است.
 

@@ -19,16 +19,34 @@ The original TV app stays in place for HDMI and hardware features. Setup does no
 There are separate bundles for **64-bit Windows** and **64-bit Linux**. The TV and computer must be on the same home network.
 
 1. Download **`SAM-TV-v0.1.4-windows.zip`** or **`SAM-TV-v0.1.4-linux.tar.gz`** from Releases and extract it.
-2. Install [**Activity Launcher from F-Droid**](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) on the TV. Open `DevelopmentActivity` (`system.development.developmentActivity`) and enable network ADB debugging. Note the TV's IP address in network settings. See the [installation guide](docs/INSTALL.en.md) for more detail.
+2. Install [**Activity Launcher from F-Droid**](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) on the TV. Open `DevelopmentActivity` (`system.development.developmentActivity`) and turn on **Developer Mode** and **USB Debugging**. Those are the only two settings needed on the tested TV. Note its IP address in network settings. See the [installation guide](docs/INSTALL.en.md) for more detail.
 3. On Windows, double-click **`Install-SAM-TV.cmd`**. On Linux, run **`Install-SAM-TV`**.
 4. Choose your language and Install, enter the TV IP, and accept the connection prompt on the TV if one appears. The installer checks compatibility first. Press **Enter** to include both optional shortcuts, then type `INSTALL` to begin.
 5. After setup, test **Home**, **Source/Input** and an HDMI selection, and the **four-color** button. Open **Choose Home** to pick your launcher.
 
 If the compatibility check stops, do not force installation. If a button does not work after setup, follow the [recovery steps](docs/INSTALL.en.md).
 
-## Choose another launcher
+## Tested launchers
 
-**Choose Home** lists installed launchers. Its **Install new launcher** tile searches the TV's Play Store. Projectivy is not bundled; install it separately through the TV store if you want it, then select it in Choose Home.
+**[Projectivy Launcher](https://play.google.com/store/apps/details?id=com.spocky.projengmenu) — tested and recommended.** It has a tidier home screen. Projectivy is not bundled; install it separately, then select it in **Choose Home**.
+
+<img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="520" alt="Official Projectivy Launcher preview from Google Play">
+
+*Example image from [Projectivy on Google Play](https://play.google.com/store/apps/details?id=com.spocky.projengmenu); your apps and wallpaper may look different.*
+
+**[Google Android TV Home](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher) — tested.** It was already installed on the test TV.
+
+<img src="https://play-lh.googleusercontent.com/kmvrlAqiL1m2HV91XvR5lP8g7h9AXx1VB2jPIWdpVUIRo2F93o5nSyJ65naRBsXvl-M3z-H5kM6mnh5Dadpx=w1052-h592" width="520" alt="Official Android TV Home preview from Google Play">
+
+*Example image from [Android TV Home on Google Play](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher).*
+
+**[LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher) — tested.** Install it separately if you want to use it.
+
+<img src="https://raw.githubusercontent.com/leanbitlab-org/LtvLauncher/master/docs/images/screenshot_1.png" width="520" alt="LTvLauncher preview from its official repository">
+
+*Example image from the [LTvLauncher project](https://github.com/leanbitlab-org/LtvLauncher).*
+
+**Choose Home** lists compatible installed launchers. Its **Install new launcher** tile searches the TV's Play Store.
 
 Read the [full installation and recovery guide](docs/INSTALL.en.md) for details. The [Persian guide](docs/INSTALL.fa.md) is also included.
 
