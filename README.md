@@ -31,3 +31,5 @@ If the compatibility check stops, do not force installation. If a button does no
 **Choose Home** lists installed launchers. Its **Install new launcher** tile searches the TV's Play Store. Projectivy is not bundled; install it separately through the TV store if you want it, then select it in Choose Home.
 
 Read the [full installation and recovery guide](docs/INSTALL.en.md) for details. The [Persian guide](docs/INSTALL.fa.md) is also included.
+
+The project's original code and documentation are available under the [MIT License](LICENSE). Third-party files have separate terms; see the [license scope notice](NOTICE.md).

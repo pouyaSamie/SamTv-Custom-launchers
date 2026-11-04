@@ -16,7 +16,7 @@ The bridge requires `START_ACTIVITIES_FROM_BACKGROUND` and `WRITE_SECURE_SETTING
 
 ## Before a public binary release
 
-1. Reimplement the three custom apps in a clean Android build with only owned or properly licensed code and resources. Provide source, reproducible build instructions, and an explicit project license chosen by the owner.
+1. Reimplement the three custom apps in a clean Android build with only owned or properly licensed code and resources. Provide source and reproducible build instructions. Keep the project's MIT license and third-party notices accurate.
 2. Obtain lawful Realtek framework API definitions or create minimal stubs from publicly documented signatures. Keep proprietary framework binaries out of the repository and build output.
 3. Replace the OEM virtual-key modification with an original, compatible solution if possible. If retaining a patch, establish redistribution rights and its per-firmware signing requirements.
 4. Replace the publisher Play Store screenshots embedded in the prototype selector with artwork that can legally be redistributed, or obtain permission. The public repo currently has no copied publisher screenshots.

@@ -17,7 +17,8 @@ def main() -> None:
     output = ROOT.parent / "releases"
     output.mkdir(exist_ok=True)
     common = [
-        ROOT / "VERSION", ROOT / "README.md", ROOT / "README.fa.md", ROOT / "samtv.py",
+        ROOT / "VERSION", ROOT / "README.md", ROOT / "README.fa.md", ROOT / "LICENSE",
+        ROOT / "NOTICE.md", ROOT / "samtv.py",
         ROOT / "docs/INSTALL.en.md", ROOT / "docs/INSTALL.fa.md",
         ROOT / "docs/THIRD-PARTY-NOTICES.md",
         *sorted((ROOT / "dist").glob("*.apk")), ROOT / "dist/SHA256SUMS.local",
