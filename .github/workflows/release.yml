@@ -16,6 +16,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Check release tag and version
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "v$(cat VERSION)"
+          test -f "docs/RELEASE_NOTES_${GITHUB_REF_NAME}.md"
       - name: Test installer source
         run: python -m unittest discover -s tests -v
       - name: Prepare pinned runtime and APK inputs
@@ -69,10 +75,10 @@ jobs:
           chmod +x ./Install-SAM-TV
           python scripts/build_release.py
           cd ../releases
-          sha256sum -c SHA256SUMS-v0.1.5
-          unzip -t SAM-TV-v0.1.5-windows.zip
-          tar -tzf SAM-TV-v0.1.5-linux.tar.gz > /dev/null
+          sha256sum -c "SHA256SUMS-$GITHUB_REF_NAME"
+          unzip -t "SAM-TV-$GITHUB_REF_NAME-windows.zip"
+          tar -tzf "SAM-TV-$GITHUB_REF_NAME-linux.tar.gz" > /dev/null
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" ../releases/* --verify-tag --title "SAM TV $GITHUB_REF_NAME" --notes-file docs/RELEASE_NOTES_v0.1.5.md
+        run: gh release create "$GITHUB_REF_NAME" ../releases/* --verify-tag --title "SAM TV $GITHUB_REF_NAME" --notes-file "docs/RELEASE_NOTES_${GITHUB_REF_NAME}.md"
