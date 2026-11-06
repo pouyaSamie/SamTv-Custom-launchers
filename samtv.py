@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAM TV Home Bridge 0.1.4 setup and recovery. Standard library only."""
+"""SAM TV Launcher 0.1.4 setup and recovery. Standard library only."""
 
 from __future__ import annotations
 
@@ -380,7 +380,7 @@ def prompt_yes(language: str, fa: str, en: str, default: bool = True) -> bool:
 
 
 def setup(language: str) -> None:
-    print(f"SAM TV Home Bridge {VERSION}")
+    print(f"SAM TV Launcher {VERSION}")
     say(language, "تلویزیون و رایانه باید به یک شبکهٔ خانگی وصل باشند.",
         "Connect the TV and computer to the same home network.")
     action = input(tr(language, "کار مورد نظر: [1] نصب  [2] بازگرداندن تنظیم قبلی (Enter = نصب): ",
@@ -436,7 +436,7 @@ def main() -> int:
                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
             return 0
-    parser = argparse.ArgumentParser(description=f"SAM TV Home Bridge {VERSION}")
+    parser = argparse.ArgumentParser(description=f"SAM TV Launcher {VERSION}")
     parser.add_argument("command", nargs="?", choices=("setup", "check", "install", "restore"), default="setup")
     parser.add_argument("--serial", help="TV_IP:5555; required for check/install/restore")
     parser.add_argument("--language", choices=("fa", "en"))
