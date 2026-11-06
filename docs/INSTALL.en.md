@@ -1,49 +1,59 @@
-# Installation and recovery
+# Install SAM TV Launcher
 
-[Back to README](../README.md) · [فارسی](INSTALL.fa.md)
+[README](../README.en.md) · [راهنمای فارسی](INSTALL.fa.md)
 
-This guide is for version **0.1.4**. It was tested on a SAM R4 running Android 11. Setup checks compatibility before changing the TV. If the check fails, it installs nothing.
+Follow this guide on the TV and a computer. With the recommended choices, **Home** opens Projectivy, **Source/Input** still switches HDMI, and the remote's **four colored dots** open the TV settings menu.
+
+Version **0.1.4** was tested on a **SAM R4 with Android 11** and matching TV software. The installer checks the TV before changing it. If the check fails, stop there; this version is not ready for your TV.
 
 ## 1. Prepare the TV
 
-Connect the TV and computer to the same home network and keep the TV on. The computer needs internet access during setup to download the selected APKs. Downloads are checked against pinned SHA-256 values before installation; if a download fails, the TV is left unchanged.
+Keep the TV on. Connect it and your computer to the **same home network**. The computer needs internet access to download the apps during installation. The TV also needs internet if you use its browser to get Activity Launcher.
 
-On the SAM TV we tested, Developer options are hidden from the normal Settings menu. To open them:
+### Open the hidden developer settings
 
-1. Install and open [**Activity Launcher from F-Droid**](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) on the TV. Do not confuse it with TV Launcher or similarly named apps.
-2. Search for **`DevelopmentActivity`**. Its identifier is **`system.development.developmentActivity`**. Open that entry.
-3. Turn on **Developer Mode** and **USB Debugging**. Those were the only two settings needed for the connection on the TV we tested.
-4. Find and note the TV's **IP address** in network settings. An example is `192.168.1.50`.
+On the tested SAM TV, the developer settings are hidden. **Activity Launcher** opens that screen for you.
 
-Activity Launcher only opens the hidden settings screen; it does not turn options on for you. If `DevelopmentActivity` or **USB Debugging** is missing, stop and report your TV model instead of trying this installer.
+1. If Activity Launcher is already on the TV, open it and continue to step 4.
+2. Otherwise, open [the Activity Launcher page on F-Droid](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) in the TV's browser. Under **Versions**, choose **Download APK** for the suggested version. Open the downloaded file and select **Install**. If the TV asks for permission to install from the browser, allow it for this download.
+3. If the TV has no usable browser but has a file manager, open the same F-Droid page on your computer, download the APK, copy it to a USB drive, and plug the drive into the TV. Open the APK with the TV's file manager and select **Install**. If neither method is available on your TV, stop here rather than guessing through other settings.
+4. Open **Activity Launcher** on the TV. Search for `DevelopmentActivity`. Open the result whose full name is `system.development.developmentActivity`.
+5. Turn on **Developer Mode** and **USB Debugging**. You do not need to change any other developer settings. USB Debugging is the name of the setting even though the installer will connect over your home network.
 
-## 2. Install from your computer
+If you cannot find `DevelopmentActivity` or USB Debugging, stop. The installer cannot connect until those options are available.
 
-Download the package for your computer from **Releases** and unzip it:
+### Write down the TV's address
 
-- **64-bit Windows:** `SAM-TV-v0.1.4-windows.zip`; double-click **`Install-SAM-TV.cmd`**.
-- **64-bit Linux:** `SAM-TV-v0.1.4-linux.tar.gz`; run **`Install-SAM-TV`**. If your file manager asks, choose to run the file.
+In the TV's settings, open **Network**, **Wi-Fi**, or **Ethernet**, depending on how it is connected. Find the **IP address** and write it down. For example, it might look like `192.168.1.50`. Enter the address shown on *your* TV, not this example. Keep this screen or the TV nearby: it may ask you to approve the computer's connection.
 
-If double-clicking does not open the Linux installer, open a terminal in the extracted folder and run `./Install-SAM-TV`.
+## 2. Run the installer on your computer
 
-In the installer, select your language and Install. Enter the TV IP address. Accept any connection authorization prompt on the TV. Setup checks compatibility first and does not change the TV during that check.
+1. Download **one** file for your computer from the [v0.1.4 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.4): [Windows ZIP](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-windows.zip) or [Linux TAR.GZ](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-linux.tar.gz). You do not need the individual APK files.
+2. **Extract** the downloaded file. Do not run the installer while it is still inside the archive.
+3. On **Windows**, open the extracted folder and double-click `Install-SAM-TV.cmd`. On **Linux**, open the extracted folder and run `Install-SAM-TV`. If your Linux file manager does not offer **Run**, open a terminal in that folder and enter `./Install-SAM-TV`.
+4. Choose your language. At **Install or Restore**, press **Enter** or type `1` for **Install**. Enter the TV's IP address when asked.
+5. Watch the TV. If it asks whether to allow **USB debugging** from this computer, choose **Allow** with the remote. The installer checks the TV's compatibility before it changes anything. If it reports that the model or software is not supported, stop.
+6. For the recommended setup, press **Enter** at each of the next four questions. This includes **Choose Home**, **TV Settings**, and **Projectivy**; it skips optional **LTvLauncher**. **Remote Buttons** is installed automatically. At the final prompt, type `INSTALL` and press Enter.
+7. Wait for **“Installation completed”**. The installer downloads and checks the selected apps, saves a copy of the previous setup, and then installs them. If it reports an error, read [If something goes wrong](#if-something-goes-wrong) before trying again.
 
-The **Choose Home** and **TV Settings** shortcuts and **Projectivy Launcher** are selected by default; press Enter at those prompts to include them. **LTvLauncher** is available but off by default. **Remote Buttons** is part of the required package and is always installed. Finally, type `INSTALL` to confirm. The installer downloads selected APKs from this project's release and the launchers' official GitHub releases. Before changing TV settings, setup saves the previous Home choice, button settings, and installed app versions under `backups` in the extracted package. Keep the entire extracted folder private and available for Restore.
+**Keep the entire extracted folder.** The installer saves the recovery copy in its `backups` folder. You need that same folder if you later restore your previous setup. The backup belongs to your TV, so do not share it.
 
 ## 3. Check the result
 
-Use the physical TV remote:
+Use the TV's physical remote:
 
-1. From an HDMI picture, press **Home**. Projectivy should open without the Sambazar ribbon if you kept the default options.
-2. Press **Source/Input**, select an HDMI port, and press **OK once**. The picture from that input should appear.
-3. Press the **colored-dots** button (four-color key). TV Settings should open. We recommend keeping this mapping; you can later change it in **Remote Buttons**.
+1. Press **Home**. Projectivy should appear without the Sambazar ribbon if you kept the recommended choices.
+2. Press **Source/Input**. Choose an HDMI input and press **OK once**. The TV should switch to that input.
+3. Press the **four colored dots**. The TV menu with **Picture**, **Sound**, and other settings should open.
+4. Restart the TV and check the three buttons again.
 
-Open **Choose Home** to pick another installed launcher. We recommend **Projectivy Launcher**; it is selected by default and downloaded when needed. See its [official release page](https://github.com/spocky/miproja1/releases/tag/4.73) and example image in the [README](../README.md#tested-launchers). Repeat the three button checks after restarting the TV.
+To choose another Home screen later, open **Choose Home** from the TV's apps. To change the four-color button, open **Remote Buttons**. We recommend leaving it set to **TV Settings** so Picture and Sound remain easy to reach.
 
-## If setup fails or you want to undo it
+## If something goes wrong
 
-If you see “This TV version has not been verified” or “The TV software differs,” nothing was installed. Do not force the installation.
+- **The installer says the TV is incompatible:** It has not installed anything. Do not force the installation on this version of the TV.
+- **The computer cannot connect:** Check that the TV is on, both devices use the same home network, the IP address has not changed, and USB Debugging is still on. Accept any connection prompt on the TV, then try again.
+- **A download fails:** Check the computer's internet connection and run the installer again. Downloads are checked before the installer changes the TV.
+- **Installation stopped after a backup, or Home/Source no longer works:** Open the installer from the **same extracted folder**. Choose **Restore previous setup** (`2`), enter the TV's IP address, and type `RESTORE` when asked. The installer checks the backup and restores the previous Home choice, button settings, and app versions. Restart the TV afterward and test the buttons. Restore does not start automatically after an installation error.
 
-If Home or Source/Input fails after setup, run the installer from the **same extracted folder** and choose **Restore previous setup**. Enter the TV IP and confirm. Restore checks for a complete backup belonging to this TV, restores the previous Home and button settings and app versions, then checks the result. It does not erase your personal apps or their data. If the backup folder is missing or a check fails, the installer reports an error instead of claiming success. After a successful Restore, restart the TV and test the buttons.
-
-If restore cannot reach the TV, check the network and ADB setting. If the TV remains unreachable, use the manufacturer's recovery process for your model. This package does not contain a TV firmware image.
+If Restore cannot connect to the TV, it cannot complete. Check the network and USB Debugging first. If the TV remains unreachable, use the recovery instructions for your TV model. This package does not contain a TV firmware image.

@@ -1,59 +1,55 @@
-# SAM TV Launcher: Home screen and remote buttons
+<div dir="rtl" align="right">
 
-Version **0.1.4** · [فارسی](README.fa.md)
+# تغییر صفحهٔ اصلی و دکمه‌های کنترل تلویزیون سام
 
-If the Sambazar ribbon gets in your way, this package lets the **Home** button open a launcher you choose while keeping the TV's HDMI input controls. You can also make the remote's four-color button open TV Settings, an app such as VLC, or the original Sambazar ribbon.
+[English](README.en.md) · نسخهٔ **0.1.4**
 
-Version 0.1.4 was tested on a **SAM R4 running Android 11**. Other SAM models may work, but they have not been tested. The installer checks the TV before changing anything and stops when it cannot confirm compatibility.
+بعد از نصب، با زدن دکمهٔ **خانه (Home)**، صفحهٔ **Projectivy** را می‌بینید و نوار سام‌بازار روی آن باز نمی‌شود. دکمهٔ **ورودی‌ها (Source/Input)** همچنان برای رفتن به HDMI کار می‌کند. دکمهٔ **چهار نقطهٔ رنگی** کنترل هم تنظیمات تصویر و صدای تلویزیون را باز می‌کند. هر وقت خواستید، می‌توانید صفحهٔ خانه یا کار دکمهٔ رنگی را عوض کنید.
 
-## What's included
+<img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="480" alt="نمونه‌ای از صفحهٔ اصلی Projectivy">
 
-- **Remote Buttons** lets you choose what the four-color button does. The package also handles Home and Source/Input.
-- **Choose Home** lets you pick the launcher opened by Home. Its shortcut is selected by default during setup, but you can skip it.
-- **TV Settings** is a shortcut to the TV's picture, sound, and other settings. It is also selected by default.
-- **Projectivy Launcher** is the recommended Home screen and selected by default. **LTvLauncher** is another optional choice. The installer downloads either launcher from its official GitHub release only when you select it and it is not already installed. Google Android TV Home is already on the tested TV.
+*این تصویر، نمونه‌ای از [Projectivy](https://play.google.com/store/apps/details?id=com.spocky.projengmenu) است. برنامه‌ها و پس‌زمینهٔ تلویزیون شما متفاوت خواهند بود.*
 
-The remote's colored-dots button (four-color key) opens **TV Settings** by default. We recommend keeping that mapping; you can change it in Remote Buttons.
+برنامهٔ اصلی تلویزیون سر جایش می‌ماند تا ورودی‌های HDMI و امکانات خود تلویزیون کار کنند. نصب این بسته تلویزیون را به تنظیمات کارخانه برنمی‌گرداند و برنامه‌های شخصی شما را پاک نمی‌کند.
 
-The original TV app stays in place for HDMI and hardware features. Setup does not erase your apps or personal data.
+## پیش از شروع
 
-The four project APKs are [separate release assets](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.4): [Remote Buttons and Home bridge](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/TVHomeBridge-v23.apk), [virtual-key update](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/Tl_VirtualKey-mapped.apk), [Choose Home shortcut](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/ChooseHomeShortcut.apk), and [TV Settings shortcut](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/TVSettingsShortcut-v2.apk). The installer downloads the selected files automatically; you do not need to open these links yourself.
+نسخهٔ فعلی روی **تلویزیون SAM R4 با اندروید ۱۱** و نرم‌افزار سازگار آزمایش شده است. برنامهٔ نصب، پیش از هر تغییری مدل و نرم‌افزار تلویزیون را بررسی می‌کند. اگر تلویزیون شما با نسخهٔ آزمایش‌شده سازگار نباشد، نصب را متوقف می‌کند. در این حالت نصب را به‌زور ادامه ندهید.
 
-## Install
+به **تلویزیون و کنترل آن**، یک رایانهٔ **ویندوزی یا لینوکسی ۶۴بیتی با پردازندهٔ Intel/AMD** و اینترنت روی رایانه نیاز دارید. تلویزیون و رایانه را به **یک شبکهٔ خانگی** وصل کنید و تلویزیون را تا پایان نصب روشن نگه دارید. اگر Activity Launcher را با مرورگر خود تلویزیون می‌گیرید، تلویزیون هم باید به اینترنت وصل باشد.
 
-There are separate bundles for **64-bit Windows** and **64-bit Linux**. The TV and computer must be on the same home network. Your computer also needs internet access during setup to download the selected APKs. The installer checks each download before changing the TV.
-You do not need to run ADB commands or transfer APKs yourself. You do need to open the TV's hidden Developer screen once and enable the two options below.
+## نصب، قدم‌به‌قدم
 
-1. Download [**`SAM-TV-v0.1.4-windows.zip`**](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-windows.zip) or [**`SAM-TV-v0.1.4-linux.tar.gz`**](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-linux.tar.gz) and extract it.
-2. Install [**Activity Launcher from F-Droid**](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) on the TV. Open `DevelopmentActivity` (`system.development.developmentActivity`) and turn on **Developer Mode** and **USB Debugging**. Those are the only two settings needed on the tested TV. Note its IP address in network settings. See the [installation guide](docs/INSTALL.en.md) for more detail.
-3. On Windows, double-click **`Install-SAM-TV.cmd`**. On Linux, run **`Install-SAM-TV`**.
-4. Choose your language and Install, enter the TV IP, and accept the connection prompt on the TV if one appears. The installer checks compatibility first. Press **Enter** to include Choose Home, TV Settings, and Projectivy. LTvLauncher is optional and off by default. Type `INSTALL` to begin.
-5. After setup, test **Home** (Projectivy by default), **Source/Input** and an HDMI selection, and the **colored-dots** button (TV Settings by default). Open **Choose Home** to switch launchers later.
+1. **Activity Launcher را روی تلویزیون نصب کنید.** آن را از [صفحهٔ F-Droid](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) بگیرید. اگر از قبل نصب است، این مرحله را رد کنید. [راهنمای نصب Activity Launcher](docs/INSTALL.fa.md) روش استفاده از مرورگر تلویزیون یا فلش USB را توضیح می‌دهد.
+2. **دو گزینهٔ لازم را روشن کنید.** در Activity Launcher، `DevelopmentActivity` را جست‌وجو کنید و موردی را که شناسه‌اش `system.development.developmentActivity` است باز کنید. فقط **Developer Mode** و **USB Debugging** را روشن کنید.
+3. **IP تلویزیون را یادداشت کنید.** آن را در تنظیمات شبکهٔ تلویزیون پیدا کنید. آدرس ممکن است شبیه `192.168.1.50` باشد؛ آدرس *تلویزیون خودتان* را لازم دارید.
+4. **فایل مناسب رایانه را دانلود کنید.** [فایل ویندوز](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-windows.zip) یا [فایل لینوکس](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-linux.tar.gz) را بگیرید و از حالت فشرده خارج کنید. فایل‌ها را از داخل ZIP یا TAR.GZ اجرا نکنید.
+5. **برنامهٔ نصب را روی رایانه اجرا کنید.** در ویندوز، در پوشهٔ بازشده روی `Install-SAM-TV.cmd` دوبار کلیک کنید. در لینوکس، فایل `Install-SAM-TV` را از همان پوشه اجرا کنید. اگر در اجرای فایل لینوکس مشکلی داشتید، [راهنمای کامل](docs/INSTALL.fa.md) را ببینید.
+6. **به پرسش‌ها پاسخ دهید.** زبان فارسی و گزینهٔ «نصب» را انتخاب کنید و IP تلویزیون را وارد کنید. اگر روی تلویزیون درخواست اجازهٔ اتصال آمد، **Allow / اجازه دادن** را بزنید. پس از بررسی سازگاری، برای نصب پیشنهادی در هر چهار پرسش بعدی **Enter** بزنید: Choose Home، TV Settings و Projectivy انتخاب می‌شوند و LTvLauncher رد می‌شود. در پایان **«نصب»** یا `INSTALL` را بنویسید و Enter بزنید. منتظر پیام موفقیت بمانید.
+7. **نتیجه را با کنترل امتحان کنید.** دکمهٔ خانه باید Projectivy را باز کند. با دکمهٔ ورودی‌ها یک HDMI را انتخاب کنید و **یک‌بار OK** بزنید. دکمهٔ چهار نقطهٔ رنگی باید تنظیمات تلویزیون را باز کند. بعد از راه‌اندازی مجدد تلویزیون، این سه دکمه را دوباره امتحان کنید.
 
-If the compatibility check stops, do not force installation. If a button does not work after setup, follow the [recovery steps](docs/INSTALL.en.md).
+**پوشهٔ بازشدهٔ فایل نصب را نگه دارید.** برنامه نسخهٔ پشتیبان را در پوشهٔ `backups` همان‌جا ذخیره می‌کند و برای بازگرداندن تنظیمات قبلی به آن نیاز دارید. این پوشه اطلاعاتی از تلویزیون شما دارد؛ آن را برای دیگران نفرستید. لازم نیست فایل‌های APK را جداگانه دانلود کنید یا دستی به تلویزیون منتقل کنید.
 
-## Tested launchers
+## بعداً چه چیزهایی را می‌توانید عوض کنید؟
 
-**[Projectivy Launcher](https://github.com/spocky/miproja1/releases/tag/4.73) — tested and recommended.** If selected during setup, the installer downloads version 4.73 from its [official APK release](https://github.com/spocky/miproja1/releases/download/4.73/ProjectivyLauncher-4.73-c98-xda-release.apk), installs it when needed, and makes it the default Home screen.
+از فهرست برنامه‌های تلویزیون، **Choose Home** را باز کنید تا صفحهٔ خانهٔ دلخواهتان را انتخاب کنید. پیشنهاد ما **Projectivy** است و برنامهٔ نصب هم آن را به‌طور پیش‌فرض انتخاب می‌کند. **صفحهٔ اصلی Android TV گوگل** روی تلویزیون آزمایشی از قبل نصب بود. اگر بخواهید، موقع نصب می‌توانید **LTvLauncher** را هم اضافه کنید. هر سه لانچر روی تلویزیون این پروژه تست شده‌اند. گزینهٔ **Install new launcher** در Choose Home جست‌وجوی لانچر را در Play Store تلویزیون باز می‌کند.
 
-<img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="520" alt="Official Projectivy Launcher preview from Google Play">
+<img src="https://play-lh.googleusercontent.com/kmvrlAqiL1m2HV91XvR5lP8g7h9AXx1VB2jPIWdpVUIRo2F93o5nSyJ65naRBsXvl-M3z-H5kM6mnh5Dadpx=w1052-h592" width="360" alt="نمونه‌ای از صفحهٔ اصلی Android TV گوگل"> <img src="https://raw.githubusercontent.com/leanbitlab-org/LtvLauncher/master/docs/images/screenshot_1.png" width="360" alt="نمونه‌ای از صفحهٔ اصلی LTvLauncher">
 
-*Example image from [Projectivy on Google Play](https://play.google.com/store/apps/details?id=com.spocky.projengmenu); your apps and wallpaper may look different.*
+*این‌ها نمونه‌هایی از [صفحهٔ اصلی Android TV گوگل](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher) و [LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher) هستند؛ ظاهر تلویزیون شما ممکن است فرق کند.*
 
-**[Google Android TV Home](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher) — tested.** It was already installed on the test TV.
+در **Remote Buttons** می‌توانید دکمهٔ چهاررنگ را برای باز کردن یک برنامهٔ نصب‌شده یا نوار قدیمی سام‌بازار تنظیم کنید. پیشنهاد می‌کنیم تنظیم پیش‌فرض **TV Settings** را نگه دارید تا تنظیمات تصویر و صدا همیشه با یک دکمه در دسترس باشد. اگر هنگام نصب میان‌بر **TV Settings** را انتخاب کرده باشید، از فهرست برنامه‌ها هم می‌توانید آن را باز کنید.
 
-<img src="https://play-lh.googleusercontent.com/kmvrlAqiL1m2HV91XvR5lP8g7h9AXx1VB2jPIWdpVUIRo2F93o5nSyJ65naRBsXvl-M3z-H5kM6mnh5Dadpx=w1052-h592" width="520" alt="Official Android TV Home preview from Google Play">
+## اگر مشکلی پیش آمد
 
-*Example image from [Android TV Home on Google Play](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher).*
+اگر برنامه گفت تلویزیون سازگار نیست، چیزی نصب نکرده است. اگر نصب بعد از گرفتن نسخهٔ پشتیبان متوقف شد یا دکمه‌ای درست کار نکرد، برنامهٔ نصب را از **همان پوشهٔ قبلی** دوباره اجرا کنید و گزینهٔ **«بازگرداندن تنظیم قبلی»** را بزنید. برنامه فقط وقتی خودتان این گزینه را انتخاب کنید بازیابی را انجام می‌دهد. [مراحل بازیابی](docs/INSTALL.fa.md) را در راهنما بخوانید.
 
-**[LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher/releases/tag/v2026.10.27) — tested.** Select it during setup if you want the [official ARMv7 APK](https://github.com/leanbitlab-org/LtvLauncher/releases/download/v2026.10.27/LTvLauncher-armeabi-v7a-release.apk) downloaded and installed; it is off by default.
+## فایل‌ها و اطلاعات پروژه
 
-<img src="https://raw.githubusercontent.com/leanbitlab-org/LtvLauncher/master/docs/images/screenshot_1.png" width="520" alt="LTvLauncher preview from its official repository">
+در [صفحهٔ انتشار نسخهٔ 0.1.4](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.4)، فایل نصب ویندوز و لینوکس، چهار فایل APK تلویزیون و فایل بررسی درستی دانلودها قرار دارند. برنامهٔ نصب، فایل‌های لازم تلویزیون را از همان صفحه می‌گیرد. اگر Projectivy یا LTvLauncher را انتخاب کنید، آن‌ها را از [صفحهٔ رسمی Projectivy](https://github.com/spocky/miproja1/releases/tag/4.73) و [صفحهٔ رسمی LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher/releases/tag/v2026.10.27) دریافت می‌کند. برای نصب معمولی، **فقط فایل مخصوص ویندوز یا لینوکس** را بگیرید.
 
-*Example image from the [LTvLauncher project](https://github.com/leanbitlab-org/LtvLauncher).*
+اگر خواستید فایل‌های تلویزیون را جداگانه ببینید، پیوندشان اینجاست: [برنامهٔ دکمه‌ها و Home](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/TVHomeBridge-v23.apk)، [به‌روزرسانی دکمه‌های مجازی](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/Tl_VirtualKey-mapped.apk)، [میان‌بر Choose Home](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/ChooseHomeShortcut.apk) و [میان‌بر TV Settings](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/TVSettingsShortcut-v2.apk). برنامهٔ نصب همهٔ این‌ها را خودش دریافت می‌کند.
 
-**Choose Home** lists compatible installed launchers. Its **Install new launcher** tile searches the TV's Play Store.
+کد و نوشته‌های اصلی این پروژه با [مجوز MIT](LICENSE) منتشر شده‌اند. فایل‌های دیگر مجوزهای خودشان را دارند؛ [توضیح مجوزها](NOTICE.md) را ببینید.
 
-Read the [full installation and recovery guide](docs/INSTALL.en.md) for details. The [Persian guide](docs/INSTALL.fa.md) is also included.
-
-The project's original code and documentation are available under the [MIT License](LICENSE). Third-party files have separate terms; see the [license scope notice](NOTICE.md).
+</div>

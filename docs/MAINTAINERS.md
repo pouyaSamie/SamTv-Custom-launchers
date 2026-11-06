@@ -1,6 +1,6 @@
 # Maintainer notes and release gate (0.1.4)
 
-Back to [README](../README.md).
+Back to [English README](../README.en.md).
 
 ## Current architecture
 
