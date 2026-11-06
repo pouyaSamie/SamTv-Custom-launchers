@@ -16,7 +16,9 @@ The TV's original software stays installed so HDMI and other TV functions can wo
 
 Version **0.1.4** was tested on one **SAM R4 running Android 11**. The installer checks more than the model name: it compares required TV software with the tested set. Another TV may also say R4 and still fail the check.
 
-If you only want to check your TV, follow the steps below until the installer shows the compatibility result. **It installs nothing unless you type `INSTALL` at the final prompt.** Passing this check alone does not prove that every remote button will work on another TV. Share the TV model, Android version, and result or error message in [Issues](https://github.com/pouyaSamie/SamTv-Custom-launchers/issues). Do not share backups or personal data. The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-014) give the exact conditions.
+If your device does not report R4 or has a different board family, the installer **stops at its first check**. That does not prove this approach could never work on your TV. It means this release has not been built and tested for it. Running the current check on such a device will not test Home or HDMI behavior.
+
+For an R4 in the same board family, you can follow the steps below until the compatibility result and leave before typing `INSTALL`. The installer has not installed anything at that point. Testing a **different model or board** needs a separate, staged investigation: first inspect its hardware and TV services without changing them, then test each change with a recovery path. Share the TV model and Android version in [Issues](https://github.com/pouyaSamie/SamTv-Custom-launchers/issues); do not share backups or personal data. The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-014) list this release's exact conditions.
 
 To install, you need the TV and its remote, a **64-bit Windows or Linux PC with an Intel/AMD processor**, and internet access on the computer. Connect both devices to the **same home network** and keep the TV on. The TV also needs internet if you use its browser to get Activity Launcher.
 

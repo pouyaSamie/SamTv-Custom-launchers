@@ -4,7 +4,7 @@
 
 Follow this guide on the TV and a computer. With the recommended choices, **Home** opens Projectivy, **Source/Input** still switches HDMI, and the remote's **four colored dots** open the TV settings menu.
 
-Version **0.1.4** was tested on a **SAM R4 running Android 11**. The name R4 alone is not enough; the installer also checks required parts of the TV software. If the check fails, stop. To check another TV without installing, follow the steps until the compatibility result appears, then leave without typing `INSTALL`. A pass does not guarantee that every remote button will work on another set. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-014) are in the technical notes.
+Version **0.1.4** was tested on a **SAM R4 running Android 11**. The name R4 alone is not enough; the installer also checks required parts of the TV software. If a device does not report R4 or has a different board family, the installer stops at its first check. This does not prove the approach cannot work there; it means this package cannot test Home or HDMI on that device. An R4 with the same board family can run the check and leave before typing `INSTALL`. Testing a different model needs a separate investigation and recovery plan. The [exact conditions for this release](MAINTAINERS.md#compatibility-gate-for-014) are in the technical notes.
 
 ## 1. Prepare the TV
 
