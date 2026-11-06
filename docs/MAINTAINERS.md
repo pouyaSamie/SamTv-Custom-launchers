@@ -26,6 +26,20 @@ The code does **not** compare `ro.software.version_id` or check the SAM brand na
 
 For a read-only check, prepare ADB on the candidate TV and run `python3 samtv.py check --serial TV_IP:5555` from a source checkout. This reads properties and installed packages and copies the two APKs into a temporary computer directory for hashing; it does not install anything on the TV. The normal setup wizard performs the same compatibility check before its final `INSTALL` prompt. For public issue reports, request the model, Android version, and concise check result, never the APK files or a full trace.
 
+## Trial flow for other models (not implemented in 0.1.4)
+
+An unfamiliar model must be able to reach a **read-only discovery result** without being rejected merely because its model or board name differs. This result is evidence for deciding whether an adapter can be built; it is not a working Home/HDMI test. Do not expose an `ignore compatibility` switch that runs the R4 installation sequence on another board.
+
+A future guided trial needs these separate gates:
+
+1. **Discover:** read Android version, board, active TV and key packages, framework libraries, signatures, Home handlers, and available ADB privileges. Keep the diagnostic report on the user's computer. Redact device identifiers before any issue report.
+2. **Prepare recovery:** save the current Home choice, component enabled states, relevant settings, and every APK that a trial may update. Verify backup hashes and that the original Home/Source path can still be invoked. If the proposed adapter needs an unbacked system change, stop here.
+3. **Preview:** install only a separately signed user app and launch it without changing default Home or disabling any vendor component. Verify it opens and can be exited. Removing that app is the rollback for this stage. This does **not** validate remote interception or HDMI switching.
+4. **Adapter trial:** offer this only for a reviewed firmware profile with a matching signing and recovery strategy. Apply one change at a time. After each step, verify ADB, Home, Source/HDMI, and settings. On a failed check, run the saved rollback and verify the original state before reporting failure. Do not continue to the next step after a failed rollback.
+5. **User confirmation:** show the exact observed results and remaining limits. Continue to full installation only after the user confirms that the TV's physical remote and HDMI picture work, including after a reboot.
+
+Automatic rollback is possible only while the TV boots and ADB remains reachable. No installer can promise an unconditional return from a boot failure or loss of ADB. The trial therefore must not write firmware partitions, change verified boot, or remove the TV core. The current `restore` command is user initiated and does not yet implement the automatic rollback in step 4; do not advertise this trial as available in the public 0.1.4 installers.
+
 ## Release checklist
 
 1. Keep the project's MIT license and third-party notices accurate. The four device-specific release APKs are currently not reproducible from the tracked source; do not claim otherwise.
