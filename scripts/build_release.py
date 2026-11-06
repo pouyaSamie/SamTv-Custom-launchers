@@ -13,7 +13,7 @@ from samtv import APKS, verify_bundle, VERSION  # noqa: E402
 def main() -> None:
     if (ROOT / "VERSION").read_text(encoding="utf-8").strip() != VERSION:
         raise SystemExit("Version file and installer version differ")
-    verify_bundle(ROOT / "dist", True, True)
+    verify_bundle(ROOT / "dist", True, True, True, True)
     release_apks = [ROOT / "dist" / name for name in APKS.values()]
     unexpected_apks = sorted(set((ROOT / "dist").glob("*.apk")) - set(release_apks))
     if unexpected_apks:

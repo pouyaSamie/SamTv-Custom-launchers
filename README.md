@@ -1,4 +1,4 @@
-# A custom Home and remote for SAM TV
+# SAM TV Launcher: Home screen and remote buttons
 
 Version **0.1.4** · [فارسی](README.fa.md)
 
@@ -11,24 +11,28 @@ Version 0.1.4 was tested on a **SAM R4 running Android 11**. Other SAM models ma
 - **Remote Buttons** lets you choose what the four-color button does. The package also handles Home and Source/Input.
 - **Choose Home** lets you pick the launcher opened by Home. Its shortcut is selected by default during setup, but you can skip it.
 - **TV Settings** is a shortcut to the TV's picture, sound, and other settings. It is also selected by default.
+- **Projectivy Launcher** is included as the recommended Home screen and selected by default. **LTvLauncher** is included as another optional choice. Google Android TV Home is already on the tested TV.
+
+The remote's colored-dots button (four-color key) opens **TV Settings** by default. We recommend keeping that mapping; you can change it in Remote Buttons.
 
 The original TV app stays in place for HDMI and hardware features. Setup does not erase your apps or personal data.
 
 ## Install
 
 There are separate bundles for **64-bit Windows** and **64-bit Linux**. The TV and computer must be on the same home network.
+You do not need to run ADB commands or transfer APKs yourself. You do need to open the TV's hidden Developer screen once and enable the two options below.
 
 1. Download **`SAM-TV-v0.1.4-windows.zip`** or **`SAM-TV-v0.1.4-linux.tar.gz`** from Releases and extract it.
 2. Install [**Activity Launcher from F-Droid**](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) on the TV. Open `DevelopmentActivity` (`system.development.developmentActivity`) and turn on **Developer Mode** and **USB Debugging**. Those are the only two settings needed on the tested TV. Note its IP address in network settings. See the [installation guide](docs/INSTALL.en.md) for more detail.
 3. On Windows, double-click **`Install-SAM-TV.cmd`**. On Linux, run **`Install-SAM-TV`**.
-4. Choose your language and Install, enter the TV IP, and accept the connection prompt on the TV if one appears. The installer checks compatibility first. Press **Enter** to include both optional shortcuts, then type `INSTALL` to begin.
-5. After setup, test **Home**, **Source/Input** and an HDMI selection, and the **four-color** button. Open **Choose Home** to pick your launcher.
+4. Choose your language and Install, enter the TV IP, and accept the connection prompt on the TV if one appears. The installer checks compatibility first. Press **Enter** to include Choose Home, TV Settings, and Projectivy. LTvLauncher is optional and off by default. Type `INSTALL` to begin.
+5. After setup, test **Home** (Projectivy by default), **Source/Input** and an HDMI selection, and the **colored-dots** button (TV Settings by default). Open **Choose Home** to switch launchers later.
 
 If the compatibility check stops, do not force installation. If a button does not work after setup, follow the [recovery steps](docs/INSTALL.en.md).
 
 ## Tested launchers
 
-**[Projectivy Launcher](https://play.google.com/store/apps/details?id=com.spocky.projengmenu) — tested and recommended.** It has a tidier home screen. Projectivy is not bundled; install it separately, then select it in **Choose Home**.
+**[Projectivy Launcher](https://github.com/spocky/miproja1/releases/tag/4.73) — tested and recommended.** Version 4.73 is included in both computer packages. If selected during setup, the installer installs it when needed and makes it the default Home screen.
 
 <img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="520" alt="Official Projectivy Launcher preview from Google Play">
 
@@ -40,7 +44,7 @@ If the compatibility check stops, do not force installation. If a button does no
 
 *Example image from [Android TV Home on Google Play](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher).*
 
-**[LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher) — tested.** Install it separately if you want to use it.
+**[LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher/releases/tag/v2026.10.27) — tested.** The ARMv7 version is included in both computer packages. Select it during setup if you want it installed; it is off by default.
 
 <img src="https://raw.githubusercontent.com/leanbitlab-org/LtvLauncher/master/docs/images/screenshot_1.png" width="520" alt="LTvLauncher preview from its official repository">
 

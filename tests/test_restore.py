@@ -28,6 +28,11 @@ class FakeDevice:
         self.commands.append(args)
         if args[0] == "install":
             package = Path(args[-1]).stem
+            package = {
+                "ProjectivyLauncher-4.73": "com.spocky.projengmenu",
+                "LTvLauncher-armeabi-v7a-release": "com.leanbitlab.ltvL",
+            }.get(package, package)
+            self.paths.setdefault(package, f"/data/app/{package}/base.apk")
             self.hashes[self.paths[package]] = samtv.sha256(Path(args[-1]))
         return "Success"
 
@@ -66,13 +71,32 @@ class FakeDevice:
 
 
 class RestoreTests(unittest.TestCase):
+    def test_optional_launchers_install_and_projectivy_is_default(self):
+        device = FakeDevice()
+        device.paths.pop("com.spocky.projengmenu")
+        device.paths.pop("com.leanbitlab.ltvL")
+        with tempfile.TemporaryDirectory() as folder, patch.object(samtv, "ROOT", Path(folder)):
+            dist = Path(folder) / "dist"
+            dist.mkdir()
+            for filename in samtv.APKS.values():
+                (dist / filename).write_bytes(filename.encode())
+            original = Path(folder) / "original.apk"
+            original.write_bytes(b"original")
+            with patch.object(samtv, "check_compatibility", return_value=(original, original)), \
+                 patch.object(samtv, "save_restore_point"):
+                samtv.install(device, "en", True, True, True, True, dist)
+        self.assertIn("com.spocky.projengmenu", device.paths)
+        self.assertIn("com.leanbitlab.ltvL", device.paths)
+        self.assertEqual(device.settings["tv_home_bridge_home_component"], samtv.PROJECTIVY_HOME)
+        self.assertEqual(device.settings["tv_home_bridge_color_action"], "settings")
+
     def test_restore_stock_state_removes_only_new_apps(self):
         device = FakeDevice()
         with tempfile.TemporaryDirectory() as folder, patch.object(samtv, "ROOT", Path(folder)):
             backup = Path(folder) / "backups" / "20260101T000000Z"
             backup.mkdir(parents=True)
             state = {
-                "schema": 1,
+                "schema": 2,
                 "device_id_hash": samtv.device_identity(device),
                 "home_activity": "com.google.android.tvlauncher/.MainActivity",
                 "home_receiver": "default",
@@ -112,7 +136,7 @@ class RestoreTests(unittest.TestCase):
                 records[package] = {"present": True, "system_only": False,
                                     "file": filename, "sha256": samtv.sha256(target)}
             state = {
-                "schema": 1,
+                "schema": 2,
                 "device_id_hash": samtv.device_identity(device),
                 "home_activity": "org.pouya.tvhomebridge/.LauncherRouterActivity",
                 "home_receiver": "disabled",
@@ -123,7 +147,7 @@ class RestoreTests(unittest.TestCase):
             (backup / "state.json").write_text(json.dumps(state), encoding="utf-8")
             samtv.restore(device, "en")
             installs = [call for call in device.commands if call[:2] == ("install", "-r")]
-            self.assertEqual(len(installs), 4)
+            self.assertEqual(len(installs), len(samtv.BACKUP_PACKAGES))
             self.assertFalse(any(call[:2] == ("pm", "uninstall") for call in device.commands))
             (package_dir / "com.example.tl_virtualkey.apk").write_bytes(b"changed")
             with self.assertRaisesRegex(samtv.SetupError, "incomplete or changed"):

@@ -28,17 +28,17 @@ If double-clicking does not open the Linux installer, open a terminal in the ext
 
 In the installer, select your language and Install. Enter the TV IP address. Accept any connection authorization prompt on the TV. Setup checks compatibility first and does not change the TV during that check.
 
-The **Choose Home** and **TV Settings** shortcuts are selected by default; press Enter to include both. **Remote Buttons** is part of the required package and is always installed. Finally, type `INSTALL` to confirm. Before changing TV settings, setup saves the previous Home choice, button settings, and installed app versions under `backups` in the extracted package. Keep the entire extracted folder private and available for Restore.
+The **Choose Home** and **TV Settings** shortcuts and **Projectivy Launcher** are selected by default; press Enter at those prompts to include them. **LTvLauncher** is also included but is off by default. **Remote Buttons** is part of the required package and is always installed. Finally, type `INSTALL` to confirm. Before changing TV settings, setup saves the previous Home choice, button settings, and installed app versions under `backups` in the extracted package. Keep the entire extracted folder private and available for Restore.
 
 ## 3. Check the result
 
 Use the physical TV remote:
 
-1. From an HDMI picture, press **Home**. Android TV Home should open without the Sambazar ribbon.
+1. From an HDMI picture, press **Home**. Projectivy should open without the Sambazar ribbon if you kept the default options.
 2. Press **Source/Input**, select an HDMI port, and press **OK once**. The picture from that input should appear.
-3. Press the **four-color** button. TV Settings should open. You can later change this button in **Remote Buttons**.
+3. Press the **colored-dots** button (four-color key). TV Settings should open. We recommend keeping this mapping; you can later change it in **Remote Buttons**.
 
-Open **Choose Home** to pick another launcher. We recommend **Projectivy Launcher**; see its [official Google Play page](https://play.google.com/store/apps/details?id=com.spocky.projengmenu) and example image in the [README](../README.md#tested-launchers). Install it separately and then select it in Choose Home. Repeat the three button checks after restarting the TV.
+Open **Choose Home** to pick another installed launcher. We recommend **Projectivy Launcher**; it is included in the package and selected by default. See its [official release page](https://github.com/spocky/miproja1/releases/tag/4.73) and example image in the [README](../README.md#tested-launchers). Repeat the three button checks after restarting the TV.
 
 ## If setup fails or you want to undo it
 

@@ -25,12 +25,18 @@ APKS = {
     "virtualkey": "Tl_VirtualKey-mapped.apk",
     "choose": "ChooseHomeShortcut.apk",
     "settings": "TVSettingsShortcut-v2.apk",
+    "projectivy": "ProjectivyLauncher-4.73.apk",
+    "ltv": "LTvLauncher-armeabi-v7a-release.apk",
 }
 HOME_RECEIVER = "com.realtek.tv/.receiver.HomeKeyReceiver"
+PROJECTIVY_HOME = "com.spocky.projengmenu/com.spocky.projengmenu.ui.home.MainActivity"
+LTV_HOME = "com.leanbitlab.ltvL/com.leanbitlab.ltvL.MainActivity"
 BACKUP_PACKAGES = (
     "org.pouya.tvhomebridge",
     "org.pouya.tvhomeselectshortcut",
     "org.pouya.tvsettingsshortcut",
+    "com.spocky.projengmenu",
+    "com.leanbitlab.ltvL",
     "com.example.tl_virtualkey",
 )
 
@@ -107,6 +113,9 @@ class Device:
         self.run("pull", sources[0], str(target), timeout=180)
 
     def package_path(self, package: str) -> str | None:
+        listed = self.shell("pm", "list", "packages", package).splitlines()
+        if f"package:{package}" not in listed:
+            return None
         paths = [line.removeprefix("package:") for line in
                  self.shell("pm", "path", package).splitlines() if line.startswith("package:")]
         if len(paths) > 1:
@@ -150,12 +159,17 @@ def check_compatibility(device: Device, working: Path) -> tuple[Path, Path]:
     return realtek, virtualkey
 
 
-def verify_bundle(apk_dir: Path, choose: bool, settings: bool) -> None:
+def verify_bundle(apk_dir: Path, choose: bool, settings: bool,
+                  projectivy: bool = True, ltv: bool = False) -> None:
     names = [APKS["bridge"], APKS["virtualkey"]]
     if choose:
         names.append(APKS["choose"])
     if settings:
         names.append(APKS["settings"])
+    if projectivy:
+        names.append(APKS["projectivy"])
+    if ltv:
+        names.append(APKS["ltv"])
     for name in names:
         if not (apk_dir / name).is_file():
             raise SetupError(f"The setup package is incomplete: {name} / فایل نصب ناقص است.")
@@ -213,7 +227,7 @@ def save_restore_point(device: Device, backup: Path) -> None:
     if "/" not in home or "ResolverActivity" in home:
         raise SetupError("Cannot identify the current default Home app.")
     state = {
-        "schema": 1,
+        "schema": 2,
         "device_id_hash": device_identity(device),
         "home_activity": home,
         "home_receiver": home_receiver_state(device),
@@ -233,7 +247,7 @@ def load_restore_point(device: Device) -> tuple[Path, dict]:
             state = json.loads(backup.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
-        if state.get("schema") != 1 or state.get("device_id_hash") != identity:
+        if state.get("schema") != 2 or state.get("device_id_hash") != identity:
             continue
         directory = backup.parent
         records = state.get("packages")
@@ -263,8 +277,9 @@ def restore_setting(device: Device, name: str, value: str) -> None:
         device.shell("settings", "put", "global", name, value)
 
 
-def install(device: Device, language: str, choose: bool, settings: bool, apk_dir: Path) -> None:
-    verify_bundle(apk_dir, choose, settings)
+def install(device: Device, language: str, choose: bool, settings: bool,
+            projectivy: bool, ltv: bool, apk_dir: Path) -> None:
+    verify_bundle(apk_dir, choose, settings, projectivy, ltv)
     with tempfile.TemporaryDirectory(prefix="samtv-check-") as temporary:
         realtek, virtualkey = check_compatibility(device, Path(temporary))
         backup = ROOT / "backups" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -280,8 +295,18 @@ def install(device: Device, language: str, choose: bool, settings: bool, apk_dir
         if settings:
             device.run("install", "-r", str(apk_dir / APKS["settings"]), timeout=180)
         device.run("install", "-r", str(apk_dir / APKS["virtualkey"]), timeout=180)
+        for selected, package, filename in (
+            (projectivy, "com.spocky.projengmenu", APKS["projectivy"]),
+            (ltv, "com.leanbitlab.ltvL", APKS["ltv"]),
+        ):
+            if selected and not device.package_path(package):
+                device.run("install", str(apk_dir / filename), timeout=180)
+            if selected and not device.package_path(package):
+                raise SetupError(f"Launcher was not installed: {package}")
+        home_target = PROJECTIVY_HOME if projectivy else LTV_HOME if ltv else \
+            "com.google.android.tvlauncher/com.google.android.tvlauncher.MainActivity"
         device.shell("settings", "put", "global", "tv_home_bridge_home_component",
-                     "com.google.android.tvlauncher/com.google.android.tvlauncher.MainActivity")
+                     home_target)
         device.shell("settings", "put", "global", "tv_home_bridge_color_action", "settings")
         device.shell("am", "start-foreground-service", "-n", "org.pouya.tvhomebridge/.KeyProbeService")
         device.shell("cmd", "package", "set-home-activity", "org.pouya.tvhomebridge/.LauncherRouterActivity")
@@ -347,9 +372,11 @@ def restore(device: Device, language: str) -> None:
         f"Previous setup restored from {backup}. Restart the TV and test the buttons.")
 
 
-def prompt_yes(language: str, fa: str, en: str) -> bool:
-    answer = input(tr(language, fa, en) + " [Y/n] ").strip().lower()
-    return answer not in {"n", "no", "خیر", "نه"}
+def prompt_yes(language: str, fa: str, en: str, default: bool = True) -> bool:
+    answer = input(tr(language, fa, en) + (" [Y/n] " if default else " [y/N] ")).strip().lower()
+    if not answer:
+        return default
+    return answer in {"y", "yes", "بله", "آری", "اره"}
 
 
 def setup(language: str) -> None:
@@ -382,13 +409,17 @@ def setup(language: str) -> None:
         "Compatibility check passed; no TV settings have changed yet.")
     choose = prompt_yes(language, "میان‌بر Choose Home نصب شود؟", "Install the Choose Home shortcut?")
     settings = prompt_yes(language, "میان‌بر TV Settings نصب شود؟", "Install the TV Settings shortcut?")
-    verify_bundle(ROOT / "dist", choose, settings)
+    projectivy = prompt_yes(language, "لانچر Projectivy نصب و پیش‌فرض شود؟ (پیشنهادی)",
+                           "Install and select Projectivy Launcher? (recommended)")
+    ltv = prompt_yes(language, "لانچر LTvLauncher هم نصب شود؟",
+                     "Also install LTvLauncher?", default=False)
+    verify_bundle(ROOT / "dist", choose, settings, projectivy, ltv)
     confirmation = input(tr(language, "برای شروع نصب، «نصب» یا INSTALL را بنویسید: ",
                             "Type INSTALL to begin: ")).strip()
     if confirmation not in {"INSTALL", "نصب"}:
         say(language, "نصب لغو شد؛ تغییری انجام نشد.", "Setup cancelled; nothing changed.")
         return
-    install(device, language, choose, settings, ROOT / "dist")
+    install(device, language, choose, settings, projectivy, ltv, ROOT / "dist")
 
 
 def main() -> int:
@@ -411,6 +442,8 @@ def main() -> int:
     parser.add_argument("--language", choices=("fa", "en"))
     parser.add_argument("--skip-choose-home", action="store_true")
     parser.add_argument("--skip-tv-settings", action="store_true")
+    parser.add_argument("--skip-projectivy", action="store_true")
+    parser.add_argument("--install-ltv", action="store_true")
     parser.add_argument("--apk-dir", type=Path, default=ROOT / "dist")
     args = parser.parse_args()
     language = args.language or ("fa" if args.command == "setup" else "en")
@@ -430,7 +463,8 @@ def main() -> int:
                 check_compatibility(device, Path(temporary))
             say(language, "این تلویزیون برای این نسخه بررسی شد.", "Compatibility check passed.")
         elif args.command == "install":
-            install(device, language, not args.skip_choose_home, not args.skip_tv_settings, args.apk_dir)
+            install(device, language, not args.skip_choose_home, not args.skip_tv_settings,
+                    not args.skip_projectivy, args.install_ltv, args.apk_dir)
         else:
             confirmation = input(tr(language, "برای بازیابی، «بازیابی» یا RESTORE را بنویسید: ",
                                     "Type RESTORE to continue: ")).strip()
