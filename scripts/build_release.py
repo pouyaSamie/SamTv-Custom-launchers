@@ -7,13 +7,17 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from samtv import verify_bundle, VERSION  # noqa: E402
+from samtv import APKS, verify_bundle, VERSION  # noqa: E402
 
 
 def main() -> None:
     if (ROOT / "VERSION").read_text(encoding="utf-8").strip() != VERSION:
         raise SystemExit("Version file and installer version differ")
     verify_bundle(ROOT / "dist", True, True)
+    release_apks = [ROOT / "dist" / name for name in APKS.values()]
+    unexpected_apks = sorted(set((ROOT / "dist").glob("*.apk")) - set(release_apks))
+    if unexpected_apks:
+        raise SystemExit(f"Unexpected APKs in dist: {[p.name for p in unexpected_apks]}")
     output = ROOT.parent / "releases"
     output.mkdir(exist_ok=True)
     common = [
@@ -21,7 +25,7 @@ def main() -> None:
         ROOT / "NOTICE.md", ROOT / "samtv.py",
         ROOT / "docs/INSTALL.en.md", ROOT / "docs/INSTALL.fa.md",
         ROOT / "docs/THIRD-PARTY-NOTICES.md",
-        *sorted((ROOT / "dist").glob("*.apk")), ROOT / "dist/SHA256SUMS.local",
+        *release_apks, ROOT / "dist/SHA256SUMS.local",
     ]
     packages = {
         "windows": [ROOT / "Install-SAM-TV.cmd", *sorted((ROOT / "runtime").iterdir()),

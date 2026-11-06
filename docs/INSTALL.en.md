@@ -28,7 +28,7 @@ If double-clicking does not open the Linux installer, open a terminal in the ext
 
 In the installer, select your language and Install. Enter the TV IP address. Accept any connection authorization prompt on the TV. Setup checks compatibility first and does not change the TV during that check.
 
-The **Choose Home** and **TV Settings** shortcuts are selected by default; press Enter to include both. **Remote Buttons** is part of the required package and is always installed. Finally, type `INSTALL` to confirm. Before changing TV settings, setup saves a recovery copy under `backups` in the extracted package. Keep that folder private.
+The **Choose Home** and **TV Settings** shortcuts are selected by default; press Enter to include both. **Remote Buttons** is part of the required package and is always installed. Finally, type `INSTALL` to confirm. Before changing TV settings, setup saves the previous Home choice, button settings, and installed app versions under `backups` in the extracted package. Keep the entire extracted folder private and available for Restore.
 
 ## 3. Check the result
 
@@ -44,6 +44,6 @@ Open **Choose Home** to pick another launcher. We recommend **Projectivy Launche
 
 If you see “This TV version has not been verified” or “The TV software differs,” nothing was installed. Do not force the installation.
 
-If Home or Source/Input fails after setup, run the same installer again and choose **Restore previous setup**. Enter the TV IP and confirm. Restore does not erase your personal apps or their data. After it reports success, restart the TV and test the buttons.
+If Home or Source/Input fails after setup, run the installer from the **same extracted folder** and choose **Restore previous setup**. Enter the TV IP and confirm. Restore checks for a complete backup belonging to this TV, restores the previous Home and button settings and app versions, then checks the result. It does not erase your personal apps or their data. If the backup folder is missing or a check fails, the installer reports an error instead of claiming success. After a successful Restore, restart the TV and test the buttons.
 
 If restore cannot reach the TV, check the network and ADB setting. If the TV remains unreachable, use the manufacturer's recovery process for your model. This package does not contain a TV firmware image.
