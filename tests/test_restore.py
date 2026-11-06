@@ -1,6 +1,7 @@
 """Offline checks for restore safety; no ADB connection is used."""
 
 import json
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
@@ -71,6 +72,49 @@ class FakeDevice:
 
 
 class RestoreTests(unittest.TestCase):
+    def test_download_checks_hash_and_cleans_failed_file(self):
+        class Response:
+            def __init__(self, payload):
+                self.payload = payload
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def geturl(self):
+                return "https://example.test/app.apk"
+
+            def read(self, _size):
+                result, self.payload = self.payload, b""
+                return result
+
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / samtv.APKS["bridge"]
+            with patch.object(samtv.urllib.request, "urlopen", return_value=Response(b"valid")), \
+                 patch.dict(samtv.APK_SHA256, {"bridge": hashlib.sha256(b"valid").hexdigest()}):
+                samtv.download_apks(Path(folder), ["bridge"])
+            self.assertEqual(target.read_bytes(), b"valid")
+            target.unlink()
+            with patch.object(samtv.urllib.request, "urlopen", return_value=Response(b"invalid")):
+                with self.assertRaisesRegex(samtv.SetupError, "Checksum failed"):
+                    samtv.download_apks(Path(folder), ["bridge"])
+            self.assertFalse(target.exists())
+            self.assertFalse(target.with_name(target.name + ".part").exists())
+
+    def test_failed_download_does_not_change_tv(self):
+        device = FakeDevice()
+        with tempfile.TemporaryDirectory() as folder, patch.object(samtv, "ROOT", Path(folder)):
+            original = Path(folder) / "original.apk"
+            original.write_bytes(b"original")
+            with patch.object(samtv, "check_compatibility", return_value=(original, original)), \
+                 patch.object(samtv, "download_apks", side_effect=samtv.SetupError("offline")):
+                with self.assertRaisesRegex(samtv.SetupError, "offline"):
+                    samtv.install(device, "en", True, True, True, False)
+            self.assertFalse((Path(folder) / "backups").exists())
+            self.assertEqual(device.commands, [])
+
     def test_optional_launchers_install_and_projectivy_is_default(self):
         device = FakeDevice()
         device.paths.pop("com.spocky.projengmenu")
@@ -80,10 +124,13 @@ class RestoreTests(unittest.TestCase):
             dist.mkdir()
             for filename in samtv.APKS.values():
                 (dist / filename).write_bytes(filename.encode())
+            checksums = {key: hashlib.sha256(filename.encode()).hexdigest()
+                         for key, filename in samtv.APKS.items()}
             original = Path(folder) / "original.apk"
             original.write_bytes(b"original")
             with patch.object(samtv, "check_compatibility", return_value=(original, original)), \
-                 patch.object(samtv, "save_restore_point"):
+                 patch.object(samtv, "save_restore_point"), \
+                 patch.object(samtv, "APK_SHA256", checksums):
                 samtv.install(device, "en", True, True, True, True, dist)
         self.assertIn("com.spocky.projengmenu", device.paths)
         self.assertIn("com.leanbitlab.ltvL", device.paths)

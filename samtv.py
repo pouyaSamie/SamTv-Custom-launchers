@@ -13,6 +13,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 
 VERSION = "0.1.4"
@@ -27,6 +29,21 @@ APKS = {
     "settings": "TVSettingsShortcut-v2.apk",
     "projectivy": "ProjectivyLauncher-4.73.apk",
     "ltv": "LTvLauncher-armeabi-v7a-release.apk",
+}
+RELEASE_REPOSITORY = "pouyaSamie/SamTv-Custom-launchers"
+APK_SHA256 = {
+    "bridge": "2c6bb6f7d87d475e5c8d03603627b7cb1a7a107a788b1169d9e466c23194edae",
+    "virtualkey": "23424366a94ea0314669dd3fc264b803058ca20b96006f001d992f26f6f62cff",
+    "choose": "6be9cc241817b9c0b16974893a67e4b8dd82352ae0f3cb85d8c9db7b4476bf30",
+    "settings": "a0c537caf58860ad455f7501ecaa783be6a1cd9ec699e24ca953af287248c0d5",
+    "projectivy": "74e33af1e5e13831a69a0669d2b68b02150bf9df1ae1df437dc67e3f8d52c790",
+    "ltv": "99eedb0136bd5ea5b17a6fa955b693fc44093a53bfbf353cf37277f9a45ed710",
+}
+APK_URLS = {
+    **{key: f"https://github.com/{RELEASE_REPOSITORY}/releases/download/v{VERSION}/{APKS[key]}"
+       for key in ("bridge", "virtualkey", "choose", "settings")},
+    "projectivy": "https://github.com/spocky/miproja1/releases/download/4.73/ProjectivyLauncher-4.73-c98-xda-release.apk",
+    "ltv": "https://github.com/leanbitlab-org/LtvLauncher/releases/download/v2026.10.27/LTvLauncher-armeabi-v7a-release.apk",
 }
 HOME_RECEIVER = "com.realtek.tv/.receiver.HomeKeyReceiver"
 PROJECTIVY_HOME = "com.spocky.projengmenu/com.spocky.projengmenu.ui.home.MainActivity"
@@ -159,27 +176,59 @@ def check_compatibility(device: Device, working: Path) -> tuple[Path, Path]:
     return realtek, virtualkey
 
 
-def verify_bundle(apk_dir: Path, choose: bool, settings: bool,
-                  projectivy: bool = True, ltv: bool = False) -> None:
-    names = [APKS["bridge"], APKS["virtualkey"]]
+def required_apks(device: Device, choose: bool, settings: bool,
+                  projectivy: bool, ltv: bool) -> list[str]:
+    keys = ["bridge", "virtualkey"]
     if choose:
-        names.append(APKS["choose"])
+        keys.append("choose")
     if settings:
-        names.append(APKS["settings"])
-    if projectivy:
-        names.append(APKS["projectivy"])
-    if ltv:
-        names.append(APKS["ltv"])
-    for name in names:
-        if not (apk_dir / name).is_file():
-            raise SetupError(f"The setup package is incomplete: {name} / فایل نصب ناقص است.")
-    checksum_file = apk_dir / "SHA256SUMS.local"
-    if checksum_file.is_file():
-        for line in checksum_file.read_text(encoding="utf-8").splitlines():
-            expected, filename = line.split(maxsplit=1)
-            filename = filename.lstrip("*")
-            if Path(filename).name != filename or sha256(apk_dir / filename) != expected:
-                raise SetupError(f"The installation file failed its checksum: {filename}")
+        keys.append("settings")
+    if projectivy and not device.package_path("com.spocky.projengmenu"):
+        keys.append("projectivy")
+    if ltv and not device.package_path("com.leanbitlab.ltvL"):
+        keys.append("ltv")
+    return keys
+
+
+def verify_bundle(apk_dir: Path, keys: list[str]) -> None:
+    for key in keys:
+        path = apk_dir / APKS[key]
+        if not path.is_file():
+            raise SetupError(f"Missing installation file: {path.name} / فایل نصب پیدا نشد.")
+        if sha256(path) != APK_SHA256[key]:
+            raise SetupError(f"Checksum failed: {path.name} / اعتبار فایل نصب تأیید نشد.")
+
+
+def download_apks(apk_dir: Path, keys: list[str]) -> None:
+    apk_dir.mkdir(parents=True, exist_ok=True)
+    for key in keys:
+        target = apk_dir / APKS[key]
+        if target.is_file() and sha256(target) == APK_SHA256[key]:
+            continue
+        url = APK_URLS[key]
+        print(f"Downloading {target.name} ...", flush=True)
+        temporary = target.with_name(target.name + ".part")
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": f"SAM-TV-Launcher/{VERSION}"})
+            with urllib.request.urlopen(request, timeout=30) as response, temporary.open("wb") as output:
+                if response.geturl().split(":", 1)[0] != "https":
+                    raise SetupError(f"Insecure download redirect: {target.name}")
+                digest = hashlib.sha256()
+                total = 0
+                while chunk := response.read(1024 * 1024):
+                    total += len(chunk)
+                    if total > 100 * 1024 * 1024:
+                        raise SetupError(f"Download is unexpectedly large: {target.name}")
+                    output.write(chunk)
+                    digest.update(chunk)
+            if digest.hexdigest() != APK_SHA256[key]:
+                raise SetupError(f"Checksum failed: {target.name} / اعتبار فایل دانلودشده تأیید نشد.")
+            temporary.replace(target)
+        except (OSError, urllib.error.URLError) as exc:
+            raise SetupError(f"Could not download {target.name} from {url}: {exc} / دانلود انجام نشد؛ اتصال اینترنت رایانه را بررسی کنید.") from exc
+        finally:
+            temporary.unlink(missing_ok=True)
+    verify_bundle(apk_dir, keys)
 
 
 def device_identity(device: Device) -> str:
@@ -278,10 +327,15 @@ def restore_setting(device: Device, name: str, value: str) -> None:
 
 
 def install(device: Device, language: str, choose: bool, settings: bool,
-            projectivy: bool, ltv: bool, apk_dir: Path) -> None:
-    verify_bundle(apk_dir, choose, settings, projectivy, ltv)
+            projectivy: bool, ltv: bool, apk_dir: Path | None = None) -> None:
     with tempfile.TemporaryDirectory(prefix="samtv-check-") as temporary:
         realtek, virtualkey = check_compatibility(device, Path(temporary))
+        keys = required_apks(device, choose, settings, projectivy, ltv)
+        if apk_dir is None:
+            apk_dir = ROOT / "downloads"
+            download_apks(apk_dir, keys)
+        else:
+            verify_bundle(apk_dir, keys)
         backup = ROOT / "backups" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         backup.mkdir(parents=True, exist_ok=False)
         shutil.copy2(realtek, backup / realtek.name)
@@ -413,13 +467,12 @@ def setup(language: str) -> None:
                            "Install and select Projectivy Launcher? (recommended)")
     ltv = prompt_yes(language, "لانچر LTvLauncher هم نصب شود؟",
                      "Also install LTvLauncher?", default=False)
-    verify_bundle(ROOT / "dist", choose, settings, projectivy, ltv)
     confirmation = input(tr(language, "برای شروع نصب، «نصب» یا INSTALL را بنویسید: ",
                             "Type INSTALL to begin: ")).strip()
     if confirmation not in {"INSTALL", "نصب"}:
         say(language, "نصب لغو شد؛ تغییری انجام نشد.", "Setup cancelled; nothing changed.")
         return
-    install(device, language, choose, settings, projectivy, ltv, ROOT / "dist")
+    install(device, language, choose, settings, projectivy, ltv)
 
 
 def main() -> int:
@@ -444,7 +497,7 @@ def main() -> int:
     parser.add_argument("--skip-tv-settings", action="store_true")
     parser.add_argument("--skip-projectivy", action="store_true")
     parser.add_argument("--install-ltv", action="store_true")
-    parser.add_argument("--apk-dir", type=Path, default=ROOT / "dist")
+    parser.add_argument("--apk-dir", type=Path, help="Use local verified APKs instead of downloading")
     args = parser.parse_args()
     language = args.language or ("fa" if args.command == "setup" else "en")
     try:

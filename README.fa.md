@@ -13,18 +13,20 @@
 - **تنظیم دکمه‌ها (Remote Buttons):** انتخاب کار دکمهٔ چهاررنگ. مدیریت دکمه‌های Home و Source هم در همین بسته است.
 - **انتخاب صفحهٔ خانه (Choose Home):** انتخاب لانچری که با Home باز می‌شود؛ مثلاً صفحهٔ اصلی اندروید تی‌وی یا Projectivy. این میان‌بر به‌طور پیش‌فرض برای نصب انتخاب شده و می‌توانید هنگام نصب از آن صرف‌نظر کنید.
 - **تنظیمات تلویزیون (TV Settings):** میان‌بری برای باز کردن تنظیمات تصویر، صدا و سایر تنظیمات خود تلویزیون. این مورد هم به‌طور پیش‌فرض انتخاب شده است.
-- **Projectivy Launcher:** لانچر پیشنهادی ماست و به‌طور پیش‌فرض برای نصب و صفحهٔ خانه انتخاب می‌شود. **LTvLauncher** هم داخل بسته است و می‌توانید هنگام نصب انتخابش کنید. صفحهٔ اصلی Android TV گوگل از قبل روی تلویزیون آزمایشی نصب بود.
+- **Projectivy Launcher:** لانچر پیشنهادی ماست و به‌طور پیش‌فرض برای نصب و صفحهٔ خانه انتخاب می‌شود. **LTvLauncher** هم گزینه‌ای اختیاری است. برنامهٔ نصب، لانچر انتخاب‌شده را در صورت نیاز از صفحهٔ رسمی آن در GitHub دریافت می‌کند. صفحهٔ اصلی Android TV گوگل از قبل روی تلویزیون آزمایشی نصب بود.
 
 دکمهٔ **نقطه‌های رنگی کنترل** (چهاررنگ) به‌طور پیش‌فرض **تنظیمات تلویزیون** را باز می‌کند. پیشنهاد می‌کنیم همین تنظیم را نگه دارید؛ هر وقت خواستید می‌توانید آن را در Remote Buttons عوض کنید.
 
 برنامهٔ اصلی تلویزیون برای نمایش HDMI و قابلیت‌های سخت‌افزاری باقی می‌ماند. نصب این بسته برنامه‌ها و اطلاعات شخصی شما را پاک نمی‌کند.
 
+چهار فایل APK این پروژه در [بخش انتشار](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.4) هستند: [مدیریت دکمه‌ها و Home](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/TVHomeBridge-v23.apk)، [به‌روزرسانی دکمه‌های مجازی](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/Tl_VirtualKey-mapped.apk)، [میان‌بر Choose Home](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/ChooseHomeShortcut.apk) و [میان‌بر TV Settings](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/TVSettingsShortcut-v2.apk). برنامهٔ نصب فایل‌های لازم را خودش دریافت می‌کند و نیازی نیست این پیوندها را جداگانه باز کنید.
+
 ## نصب در چند قدم
 
-برای **ویندوز ۶۴بیتی** و **لینوکس ۶۴بیتی** فایل جداگانه آماده شده است. تلویزیون و رایانه باید به یک شبکهٔ خانگی وصل باشند.
+برای **ویندوز ۶۴بیتی** و **لینوکس ۶۴بیتی** فایل جداگانه آماده شده است. تلویزیون و رایانه باید به یک شبکهٔ خانگی وصل باشند. رایانه هنگام نصب به اینترنت هم نیاز دارد تا فایل‌های انتخاب‌شده را دریافت کند. برنامه پیش از تغییر تلویزیون، درستی فایل‌ها را بررسی می‌کند.
 نیازی به نوشتن دستور ADB یا جابه‌جایی دستی فایل‌های APK ندارید. فقط لازم است یک‌بار صفحهٔ پنهان گزینه‌های توسعه‌دهندهٔ تلویزیون را باز کنید و دو گزینهٔ زیر را روشن کنید.
 
-۱. فایل مناسب رایانه‌تان، **`SAM-TV-v0.1.4-windows.zip`** یا **`SAM-TV-v0.1.4-linux.tar.gz`**، را از بخش Releases دریافت و از حالت فشرده خارج کنید.
+۱. فایل مناسب رایانه‌تان، [**`SAM-TV-v0.1.4-windows.zip`**](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-windows.zip) یا [**`SAM-TV-v0.1.4-linux.tar.gz`**](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-linux.tar.gz)، را دریافت و از حالت فشرده خارج کنید.
 
 ۲. برنامهٔ [**Activity Launcher** در F-Droid](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/) را روی تلویزیون نصب و باز کنید. `DevelopmentActivity` را جست‌وجو کنید؛ شناسهٔ آن `system.development.developmentActivity` است. در آن صفحه فقط **Developer Mode** و **USB Debugging** را روشن کنید. سپس آدرس IP تلویزیون را از تنظیمات شبکه یادداشت کنید. [توضیح بیشتر](docs/INSTALL.fa.md) در راهنمای نصب آمده است.
 
@@ -38,7 +40,7 @@
 
 ## لانچرهای تست‌شده
 
-**[Projectivy Launcher](https://github.com/spocky/miproja1/releases/tag/4.73) — تست شده و پیشنهاد ما.** نسخهٔ 4.73 داخل هر دو بستهٔ رایانه است. اگر هنگام راه‌اندازی انتخابش کنید، برنامهٔ نصب در صورت نیاز آن را نصب می‌کند و صفحهٔ خانهٔ پیش‌فرض قرار می‌دهد.
+**[Projectivy Launcher](https://github.com/spocky/miproja1/releases/tag/4.73) — تست شده و پیشنهاد ما.** اگر هنگام راه‌اندازی انتخابش کنید، برنامهٔ نصب نسخهٔ 4.73 را از [صفحهٔ رسمی انتشار APK](https://github.com/spocky/miproja1/releases/download/4.73/ProjectivyLauncher-4.73-c98-xda-release.apk) دریافت و در صورت نیاز نصب می‌کند و صفحهٔ خانهٔ پیش‌فرض قرار می‌دهد.
 
 <img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="520" alt="نمای عمومی Projectivy Launcher از صفحهٔ رسمی برنامه در Google Play">
 
@@ -50,7 +52,7 @@
 
 *تصویر نمونه از [صفحهٔ Android TV Home در Google Play](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher).*
 
-**[LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher/releases/tag/v2026.10.27) — تست شده.** نسخهٔ ARMv7 آن داخل هر دو بسته است. اگر می‌خواهید نصب شود، هنگام راه‌اندازی انتخابش کنید؛ به‌طور پیش‌فرض انتخاب نشده است.
+**[LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher/releases/tag/v2026.10.27) — تست شده.** اگر می‌خواهید [نسخهٔ رسمی ARMv7](https://github.com/leanbitlab-org/LtvLauncher/releases/download/v2026.10.27/LTvLauncher-armeabi-v7a-release.apk) دریافت و نصب شود، هنگام راه‌اندازی انتخابش کنید؛ به‌طور پیش‌فرض انتخاب نشده است.
 
 <img src="https://raw.githubusercontent.com/leanbitlab-org/LtvLauncher/master/docs/images/screenshot_1.png" width="520" alt="نمای عمومی LTvLauncher از مخزن رسمی سازنده">
 

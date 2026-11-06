@@ -6,7 +6,7 @@ This guide is for version **0.1.4**. It was tested on a SAM R4 running Android 1
 
 ## 1. Prepare the TV
 
-Connect the TV and computer to the same home network and keep the TV on.
+Connect the TV and computer to the same home network and keep the TV on. The computer needs internet access during setup to download the selected APKs. Downloads are checked against pinned SHA-256 values before installation; if a download fails, the TV is left unchanged.
 
 On the SAM TV we tested, Developer options are hidden from the normal Settings menu. To open them:
 
@@ -28,7 +28,7 @@ If double-clicking does not open the Linux installer, open a terminal in the ext
 
 In the installer, select your language and Install. Enter the TV IP address. Accept any connection authorization prompt on the TV. Setup checks compatibility first and does not change the TV during that check.
 
-The **Choose Home** and **TV Settings** shortcuts and **Projectivy Launcher** are selected by default; press Enter at those prompts to include them. **LTvLauncher** is also included but is off by default. **Remote Buttons** is part of the required package and is always installed. Finally, type `INSTALL` to confirm. Before changing TV settings, setup saves the previous Home choice, button settings, and installed app versions under `backups` in the extracted package. Keep the entire extracted folder private and available for Restore.
+The **Choose Home** and **TV Settings** shortcuts and **Projectivy Launcher** are selected by default; press Enter at those prompts to include them. **LTvLauncher** is available but off by default. **Remote Buttons** is part of the required package and is always installed. Finally, type `INSTALL` to confirm. The installer downloads selected APKs from this project's release and the launchers' official GitHub releases. Before changing TV settings, setup saves the previous Home choice, button settings, and installed app versions under `backups` in the extracted package. Keep the entire extracted folder private and available for Restore.
 
 ## 3. Check the result
 
@@ -38,7 +38,7 @@ Use the physical TV remote:
 2. Press **Source/Input**, select an HDMI port, and press **OK once**. The picture from that input should appear.
 3. Press the **colored-dots** button (four-color key). TV Settings should open. We recommend keeping this mapping; you can later change it in **Remote Buttons**.
 
-Open **Choose Home** to pick another installed launcher. We recommend **Projectivy Launcher**; it is included in the package and selected by default. See its [official release page](https://github.com/spocky/miproja1/releases/tag/4.73) and example image in the [README](../README.md#tested-launchers). Repeat the three button checks after restarting the TV.
+Open **Choose Home** to pick another installed launcher. We recommend **Projectivy Launcher**; it is selected by default and downloaded when needed. See its [official release page](https://github.com/spocky/miproja1/releases/tag/4.73) and example image in the [README](../README.md#tested-launchers). Repeat the three button checks after restarting the TV.
 
 ## If setup fails or you want to undo it
 

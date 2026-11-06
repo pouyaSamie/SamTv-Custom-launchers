@@ -21,3 +21,6 @@ __pycache__/
 *.spec
 *.zip
 *.tar.gz
+downloads/
+apks/
+release-assets/
