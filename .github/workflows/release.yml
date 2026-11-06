@@ -1,0 +1,78 @@
+name: Build and publish release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test installer source
+        run: python -m unittest discover -s tests -v
+      - name: Prepare pinned runtime and APK inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/samtv-inputs dist
+          base='https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4'
+          curl --fail --location --retry 3 "$base/SAM-TV-v0.1.4-windows.zip" -o /tmp/samtv-inputs/windows.zip
+          curl --fail --location --retry 3 "$base/SAM-TV-v0.1.4-linux.tar.gz" -o /tmp/samtv-inputs/linux.tar.gz
+          printf '%s  %s\n' \
+            '6ba7c11cfb60970081d221681c5322073ea9a4b8a67ffbe9ebda49ce88d1e3e9' /tmp/samtv-inputs/windows.zip \
+            '6475615e0abd65dde2674620979015720ffe9546a7d688630307c5442bde5703' /tmp/samtv-inputs/linux.tar.gz | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          import tarfile
+          import zipfile
+          root = Path.cwd()
+          with zipfile.ZipFile('/tmp/samtv-inputs/windows.zip') as archive:
+              for name in archive.namelist():
+                  relative = name.removeprefix('SAM-TV-v0.1.4/')
+                  if relative.startswith('runtime/') or relative in {
+                      'tools/adb.exe', 'tools/AdbWinApi.dll', 'tools/AdbWinUsbApi.dll',
+                      'tools/libwinpthread-1.dll', 'tools/NOTICE.txt'}:
+                      target = root / relative
+                      if name.endswith('/'):
+                          target.mkdir(parents=True, exist_ok=True)
+                      else:
+                          target.parent.mkdir(parents=True, exist_ok=True)
+                          with archive.open(name) as source, target.open('wb') as output:
+                              shutil.copyfileobj(source, output)
+          with tarfile.open('/tmp/samtv-inputs/linux.tar.gz', 'r:gz') as archive:
+              member = archive.getmember('SAM-TV-v0.1.4/tools/adb')
+              target = root / 'tools/adb'
+              with archive.extractfile(member) as source, target.open('wb') as output:
+                  shutil.copyfileobj(source, output)
+              target.chmod(0o755)
+          PY
+          for file in TVHomeBridge-v23.apk Tl_VirtualKey-mapped.apk ChooseHomeShortcut.apk TVSettingsShortcut-v2.apk; do
+            curl --fail --location --retry 3 "$base/$file" -o "dist/$file"
+          done
+          python -c 'from pathlib import Path; from samtv import verify_bundle; verify_bundle(Path("dist"), ["bridge", "virtualkey", "choose", "settings"])'
+      - name: Build Linux executable and release archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyinstaller==6.22.3
+          python -m PyInstaller --onefile --name Install-SAM-TV --distpath /tmp/samtv-binary samtv.py
+          cp /tmp/samtv-binary/Install-SAM-TV ./Install-SAM-TV
+          chmod +x ./Install-SAM-TV
+          python scripts/build_release.py
+          cd ../releases
+          sha256sum -c SHA256SUMS-v0.1.5
+          unzip -t SAM-TV-v0.1.5-windows.zip
+          tar -tzf SAM-TV-v0.1.5-linux.tar.gz > /dev/null
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" ../releases/* --verify-tag --title "SAM TV $GITHUB_REF_NAME" --notes-file docs/RELEASE_NOTES_v0.1.5.md

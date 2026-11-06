@@ -4,7 +4,7 @@
 
 Follow this guide on the TV and a computer. With the recommended choices, **Home** opens Projectivy, **Source/Input** still switches HDMI, and the remote's **four colored dots** open the TV settings menu.
 
-Version **0.1.4** was tested on a **SAM R4 running Android 11**. The name R4 alone is not enough; the installer also checks required parts of the TV software. If a device does not report R4 or has a different board family, the installer stops at its first check. This does not prove the approach cannot work there; it means this package cannot test Home or HDMI on that device. An R4 with the same board family can run the check and leave before typing `INSTALL`. Testing a different model needs a separate investigation and recovery plan. The [exact conditions for this release](MAINTAINERS.md#compatibility-gate-for-014) are in the technical notes.
+Version **0.1.5** is prepared for the tested **SAM R4 running Android 11** and its matching TV software. The name R4 alone is not enough; the installer checks required software too. On a different model or board, you can run **Read-only discovery** first and then choose **Experimental trial** if you accept the risk. This path has not been field-tested on another model. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-015) are in the technical notes.
 
 ## 1. Prepare the TV
 
@@ -28,15 +28,28 @@ In the TV's settings, open **Network**, **Wi-Fi**, or **Ethernet**, depending on
 
 ## 2. Run the installer on your computer
 
-1. Download **one** file for your computer from the [v0.1.4 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.4): [Windows ZIP](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-windows.zip) or [Linux TAR.GZ](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.4/SAM-TV-v0.1.4-linux.tar.gz). You do not need the individual APK files.
+1. Download **one** file for your computer from the [v0.1.5 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.5): [Windows ZIP](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/SAM-TV-v0.1.5-windows.zip) or [Linux TAR.GZ](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/SAM-TV-v0.1.5-linux.tar.gz). You do not need the individual APK files.
 2. **Extract** the downloaded file. Do not run the installer while it is still inside the archive.
 3. On **Windows**, open the extracted folder and double-click `Install-SAM-TV.cmd`. On **Linux**, open the extracted folder and run `Install-SAM-TV`. If your Linux file manager does not offer **Run**, open a terminal in that folder and enter `./Install-SAM-TV`.
-4. Choose your language. At **Install or Restore**, press **Enter** or type `1` for **Install**. Enter the TV's IP address when asked.
+4. Choose your language. Press **Enter** or type `1` for **Install**. Type `3` for **Read-only discovery**, or `4` for **Experimental trial**. Enter the TV's IP address when asked.
 5. Watch the TV. If it asks whether to allow **USB debugging** from this computer, choose **Allow** with the remote. The installer checks the TV's compatibility before it changes anything. If it reports that the model or software is not supported, stop.
-6. For the recommended setup, press **Enter** at each of the next four questions. This includes **Choose Home**, **TV Settings**, and **Projectivy**; it skips optional **LTvLauncher**. **Remote Buttons** is installed automatically. At the final prompt, type `INSTALL` and press Enter.
+6. For the recommended setup, press **Enter** at each of the next four questions. This includes **Choose Home**, **TV Settings**, and **Projectivy**; it skips optional **LTvLauncher**. **Remote Buttons** is installed automatically. Read the warning. If you want to proceed, type `INSTALL` and press Enter.
 7. Wait for **“Installation completed”**. The installer downloads and checks the selected apps, saves a copy of the previous setup, and then installs them. If it reports an error, read [If something goes wrong](#if-something-goes-wrong) before trying again.
 
 **Keep the entire extracted folder.** The installer saves the recovery copy in its `backups` folder. You need that same folder if you later restore your previous setup. The backup belongs to your TV, so do not share it.
+
+If you chose `3`, the installer shows the TV information and asks whether to run the **strict normal-install check**. The default answer is **No**. Answering **Yes** still installs nothing; normal installation prompts appear only if the TV matches the tested profile. To try another model, start again and choose `4`.
+
+### Trial on another model
+
+This section applies only to option `4`. The model, board, and original APK hashes may differ from the tested R4, but **Android 11, the required Realtek apps, and ADB root** must be present. Without them, the installer stops before changing the TV.
+
+1. After entering the IP address, read the displayed TV information and warning. Type `EXPERIMENT` only if you want to proceed. Any other answer exits without installing anything.
+2. The installer downloads and verifies its files, then saves and checks a **recovery backup before any change**. It activates the core pieces for a trial.
+3. At **“Trial is ready,”** use the physical remote to test Home, Source/Input and selecting a connected HDMI input with one OK press, the four-color button, audio, and picture.
+4. If **all** work, type `PASS` on the computer. The installer then adds your selected shortcuts. If anything fails or you want to stop, enter anything else. The installer runs restore and checks the previous setup. Restart the TV after restore and test the buttons again.
+
+This trial cannot guarantee recovery under every failure. **If the TV stops booting or ADB is unavailable, automatic restore cannot run.** Firmware partitions are not modified. Keep the installer folder and its `backups` directory.
 
 ## 3. Check the result
 
@@ -54,6 +67,6 @@ To choose another Home screen later, open **Choose Home** from the TV's apps. To
 - **The installer says the TV is incompatible:** It has not installed anything. Do not force the installation on this version of the TV.
 - **The computer cannot connect:** Check that the TV is on, both devices use the same home network, the IP address has not changed, and USB Debugging is still on. Accept any connection prompt on the TV, then try again.
 - **A download fails:** Check the computer's internet connection and run the installer again. Downloads are checked before the installer changes the TV.
-- **Installation stopped after a backup, or Home/Source no longer works:** Open the installer from the **same extracted folder**. Choose **Restore previous setup** (`2`), enter the TV's IP address, and type `RESTORE` when asked. The installer checks the backup and restores the previous Home choice, button settings, and app versions. Restart the TV afterward and test the buttons. Restore does not start automatically after an installation error.
+- **Normal installation stopped after a backup, or Home/Source no longer works:** Open the installer from the **same extracted folder**. Choose **Restore previous setup** (`2`), enter the TV's IP address, and type `RESTORE` when asked. The installer checks the backup and restores the previous Home choice, button settings, and app versions. Restart the TV afterward and test the buttons. In experimental mode, the installer attempts restore automatically if the trial fails.
 
 If Restore cannot connect to the TV, it cannot complete. Check the network and USB Debugging first. If the TV remains unreachable, use the recovery instructions for your TV model. This package does not contain a TV firmware image.

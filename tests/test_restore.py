@@ -24,6 +24,9 @@ class FakeDevice:
         }
         self.commands = []
 
+    def connect(self):
+        self.commands.append(("connect",))
+
     def package_path(self, package):
         return self.paths.get(package)
 
@@ -68,12 +71,111 @@ class FakeDevice:
             self.settings[args[3]] = args[4]
         if args[:3] == ("settings", "delete", "global"):
             self.settings.pop(args[3], None)
+        if args[:3] == ("settings", "get", "global"):
+            return self.settings.get(args[3], "null")
         if args[0] == "sha256sum":
             return self.hashes.get(args[1], "missing") + "  " + args[1]
         return "Success"
 
 
 class RestoreTests(unittest.TestCase):
+    def test_wizard_requires_experiment_acknowledgment(self):
+        device = FakeDevice()
+        answers = iter(("4", "192.168.1.50", "NO"))
+        with patch.object(samtv, "Device", return_value=device), \
+             patch.object(samtv, "inspect_device"), \
+             patch.object(samtv, "check_compatibility") as check, \
+             patch("builtins.input", side_effect=lambda _prompt="": next(answers)):
+            samtv.setup("en")
+        check.assert_not_called()
+        self.assertEqual(device.commands, [("connect",)])
+
+    def test_experimental_gate_accepts_other_board_with_required_services(self):
+        class Candidate:
+            def shell(self, *args):
+                values = {
+                    ("getprop", "ro.product.model"): "SAM-X",
+                    ("getprop", "ro.build.version.release"): "11",
+                    ("getprop", "ro.hardware"): "another-chip",
+                    ("getprop", "ro.product.board"): "another-board",
+                    ("pm", "list", "libraries"): "library:rtk-framework",
+                    ("su", "0", "id"): "uid=0(root)",
+                }
+                if args[:2] == ("pm", "path"):
+                    return "package:/system_ext/app/Tl_VirtualKey/Tl_VirtualKey.apk"
+                if args[:2] == ("dumpsys", "package"):
+                    return "com.realtek.tv.receiver.HomeKeyReceiver"
+                return values[args]
+
+            def pull_package(self, _package, target):
+                target.write_bytes(b"different TV APK")
+
+            def run(self, *args, **_kwargs):
+                if args[0] == "pull":
+                    Path(args[2]).write_bytes(b"different virtual key")
+
+        with tempfile.TemporaryDirectory() as folder:
+            candidate = Candidate()
+            with self.assertRaisesRegex(samtv.SetupError, "not been verified"):
+                samtv.check_compatibility(candidate, Path(folder))
+            realtek, virtualkey = samtv.check_compatibility(
+                candidate, Path(folder), experimental=True)
+            self.assertTrue(realtek.is_file())
+            self.assertTrue(virtualkey.is_file())
+
+    def test_experimental_trial_restores_when_user_rejects_it(self):
+        device = FakeDevice()
+        with tempfile.TemporaryDirectory() as folder, patch.object(samtv, "ROOT", Path(folder)):
+            apks = Path(folder) / "dist"
+            apks.mkdir()
+            for filename in samtv.APKS.values():
+                (apks / filename).write_bytes(filename.encode())
+            checksums = {key: hashlib.sha256(filename.encode()).hexdigest()
+                         for key, filename in samtv.APKS.items()}
+            original = Path(folder) / "original.apk"
+            original.write_bytes(b"original")
+            with patch.object(samtv, "check_compatibility", return_value=(original, original)), \
+                 patch.object(samtv, "save_restore_point"), \
+                 patch.object(samtv, "load_restore_point") as load_backup, \
+                 patch.object(samtv, "restore") as restore, \
+                 patch.object(samtv, "APK_SHA256", checksums), \
+                 patch("builtins.input", return_value="FAIL"):
+                load_backup.side_effect = lambda _device: (
+                    next((Path(folder) / "backups").iterdir()), {})
+                with self.assertRaisesRegex(samtv.SetupError, "previous setup was restored"):
+                    samtv.install(device, "en", True, True, True, False, apks,
+                                  experimental=True)
+            restore.assert_called_once_with(device, "en")
+            installed_files = [call[-1] for call in device.commands if call[0] == "install"]
+            self.assertNotIn(str(apks / samtv.APKS["choose"]), installed_files)
+            self.assertNotIn(str(apks / samtv.APKS["settings"]), installed_files)
+
+    def test_experimental_trial_continues_only_after_pass(self):
+        device = FakeDevice()
+        with tempfile.TemporaryDirectory() as folder, patch.object(samtv, "ROOT", Path(folder)):
+            apks = Path(folder) / "dist"
+            apks.mkdir()
+            for filename in samtv.APKS.values():
+                (apks / filename).write_bytes(filename.encode())
+            checksums = {key: hashlib.sha256(filename.encode()).hexdigest()
+                         for key, filename in samtv.APKS.items()}
+            original = Path(folder) / "original.apk"
+            original.write_bytes(b"original")
+            with patch.object(samtv, "check_compatibility", return_value=(original, original)), \
+                 patch.object(samtv, "save_restore_point"), \
+                 patch.object(samtv, "load_restore_point") as load_backup, \
+                 patch.object(samtv, "restore") as restore, \
+                 patch.object(samtv, "APK_SHA256", checksums), \
+                 patch("builtins.input", return_value="PASS"):
+                load_backup.side_effect = lambda _device: (
+                    next((Path(folder) / "backups").iterdir()), {})
+                samtv.install(device, "en", True, True, True, False, apks,
+                              experimental=True)
+            restore.assert_not_called()
+            installed_files = [call[-1] for call in device.commands if call[0] == "install"]
+            self.assertIn(str(apks / samtv.APKS["choose"]), installed_files)
+            self.assertIn(str(apks / samtv.APKS["settings"]), installed_files)
+
     def test_probe_reads_only_on_an_unknown_model(self):
         device = FakeDevice()
         device.paths.pop("com.realtek.tv", None)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAM TV Launcher 0.1.4 setup and recovery. Standard library only."""
+"""SAM TV Launcher 0.1.5 setup and recovery. Standard library only."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-VERSION = "0.1.4"
+VERSION = "0.1.5"
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 TESTED_REALTEK = "6b2939ee1e30f2c13534692022831f843aa4f587eeee6991e5fbcf6340cad652"
 TESTED_VIRTUALKEY = "3fb39f1da8b17967dddedb7c3828178201e1f474fc7ed097fe3da4111b88e73e"
@@ -148,13 +148,16 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def check_compatibility(device: Device, working: Path) -> tuple[Path, Path]:
+def check_compatibility(device: Device, working: Path,
+                        experimental: bool = False) -> tuple[Path, Path]:
     model = device.shell("getprop", "ro.product.model")
     android = device.shell("getprop", "ro.build.version.release")
     hardware = device.shell("getprop", "ro.hardware")
     board = device.shell("getprop", "ro.product.board")
     print(f"TV: {model}, Android {android}, {hardware} / {board}")
-    if model != "R4" or android != "11" or "2851" not in (hardware + board).lower():
+    if android != "11":
+        raise SetupError("This installer requires Android 11. Nothing was installed. / این نصب‌کننده به اندروید ۱۱ نیاز دارد؛ چیزی نصب نشد.")
+    if not experimental and (model != "R4" or "2851" not in (hardware + board).lower()):
         raise SetupError("This TV version has not been verified. Nothing was installed. / این مدل هنوز بررسی نشده و چیزی نصب نشد.")
     realtek = working / "RtkLiveTv.apk"
     virtualkey = working / "Tl_VirtualKey.apk"
@@ -164,7 +167,8 @@ def check_compatibility(device: Device, working: Path) -> tuple[Path, Path]:
     if not device.shell("pm", "path", "com.example.tl_virtualkey").startswith("package:"):
         raise SetupError("Required TV app is missing: com.example.tl_virtualkey")
     device.run("pull", ORIGINAL_VIRTUALKEY_PATH, str(virtualkey), timeout=180)
-    if sha256(realtek) != TESTED_REALTEK or sha256(virtualkey) != TESTED_VIRTUALKEY:
+    if not experimental and (sha256(realtek) != TESTED_REALTEK or
+                             sha256(virtualkey) != TESTED_VIRTUALKEY):
         raise SetupError("The TV software differs from the tested version. Nothing was installed. / نرم‌افزار تلویزیون با نسخهٔ آزمایش‌شده فرق دارد؛ چیزی نصب نشد.")
     for package in ("com.realtek.menu", "com.google.android.tvlauncher"):
         if not device.shell("pm", "path", package).startswith("package:"):
@@ -173,6 +177,9 @@ def check_compatibility(device: Device, working: Path) -> tuple[Path, Path]:
         raise SetupError("Realtek framework is missing. Nothing was installed.")
     if "uid=0(root)" not in device.shell("su", "0", "id"):
         raise SetupError("This TV does not provide the root access needed for the Home receiver. Nothing was installed.")
+    if experimental and "com.realtek.tv.receiver.HomeKeyReceiver" not in device.shell(
+            "dumpsys", "package", "com.realtek.tv"):
+        raise SetupError("The required Home receiver is missing. Nothing was installed. / گیرندهٔ لازم برای دکمهٔ خانه پیدا نشد؛ چیزی نصب نشد.")
     return realtek, virtualkey
 
 
@@ -201,8 +208,8 @@ def inspect_device(device: Device, language: str) -> None:
         root = False
     print(f"ADB root: {'available' if root else 'unavailable'}")
     say(language,
-        "این فقط شناسایی اولیه است؛ Home و HDMI آزمایش نشده‌اند و نصب برای این مدل تأیید نشده است.",
-        "This is discovery only. Home and HDMI were not tested; installation is not approved for this model.")
+        "این فقط شناسایی اولیه است؛ Home و HDMI آزمایش نشده‌اند و نصب معمولی برای این مدل تأیید نشده است.",
+        "This is discovery only. Home and HDMI were not tested; normal installation is not approved for this model.")
 
 
 def required_apks(device: Device, choose: bool, settings: bool,
@@ -356,9 +363,10 @@ def restore_setting(device: Device, name: str, value: str) -> None:
 
 
 def install(device: Device, language: str, choose: bool, settings: bool,
-            projectivy: bool, ltv: bool, apk_dir: Path | None = None) -> None:
+            projectivy: bool, ltv: bool, apk_dir: Path | None = None,
+            experimental: bool = False) -> None:
     with tempfile.TemporaryDirectory(prefix="samtv-check-") as temporary:
-        realtek, virtualkey = check_compatibility(device, Path(temporary))
+        realtek, virtualkey = check_compatibility(device, Path(temporary), experimental=experimental)
         keys = required_apks(device, choose, settings, projectivy, ltv)
         if apk_dir is None:
             apk_dir = ROOT / "downloads"
@@ -370,12 +378,16 @@ def install(device: Device, language: str, choose: bool, settings: bool,
         shutil.copy2(realtek, backup / realtek.name)
         shutil.copy2(virtualkey, backup / virtualkey.name)
         save_restore_point(device, backup)
+        if experimental:
+            verified_backup, _ = load_restore_point(device)
+            if verified_backup != backup:
+                raise SetupError("The recovery backup could not be verified. Nothing was installed. / نسخهٔ پشتیبان تأیید نشد؛ چیزی نصب نشد.")
     say(language, f"نسخهٔ پشتیبان در {backup} ذخیره شد.", f"Recovery backup saved at {backup}.")
     try:
         device.run("install", "-r", str(apk_dir / APKS["bridge"]), timeout=180)
-        if choose:
+        if choose and not experimental:
             device.run("install", "-r", str(apk_dir / APKS["choose"]), timeout=180)
-        if settings:
+        if settings and not experimental:
             device.run("install", "-r", str(apk_dir / APKS["settings"]), timeout=180)
         device.run("install", "-r", str(apk_dir / APKS["virtualkey"]), timeout=180)
         for selected, package, filename in (
@@ -397,7 +409,28 @@ def install(device: Device, language: str, choose: bool, settings: bool,
             device.shell("su", "0", "pm", "disable-user", "--user", "0", HOME_RECEIVER)
         if home_receiver_state(device) != "disabled":
             raise SetupError("Home receiver did not stay disabled.")
-    except SetupError as exc:
+        if experimental:
+            say(language,
+                "آزمون موقت آماده است. با کنترل واقعی، Home، انتخاب HDMI با یک OK، دکمهٔ چهاررنگ، صدا و تصویر را امتحان کنید. اگر همه درست بود، PASS را بنویسید؛ هر پاسخ دیگر تنظیم قبلی را برمی‌گرداند.",
+                "Trial is ready. With the physical remote, test Home, HDMI selection with one OK, four-color, audio and picture. Type PASS only if all work; any other answer restores the previous setup.")
+            if input(tr(language, "نتیجهٔ آزمون (PASS یا هر پاسخ دیگر): ",
+                        "Trial result (PASS or anything else): ")).strip() != "PASS":
+                raise SetupError("The trial was not approved. / آزمون تأیید نشد.")
+            device.connect()
+            if choose:
+                device.run("install", "-r", str(apk_dir / APKS["choose"]), timeout=180)
+            if settings:
+                device.run("install", "-r", str(apk_dir / APKS["settings"]), timeout=180)
+    except (SetupError, EOFError, KeyboardInterrupt) as exc:
+        if experimental:
+            try:
+                restore(device, language)
+            except SetupError as rollback_error:
+                raise SetupError(
+                    f"Trial failed: {exc}. Automatic restore also failed: {rollback_error}\n"
+                    f"Recovery backup: {backup}") from exc
+            raise SetupError(f"Trial stopped and previous setup was restored: {exc}\n"
+                             f"Recovery backup: {backup}") from exc
         raise SetupError(f"Installation stopped: {exc}\nRecovery backup: {backup}") from exc
     say(language, "نصب با موفقیت انجام شد. حالا دکمه‌های Home، Source و چهاررنگ را امتحان کنید.",
         "Installation completed. Now test Home, Source/Input, and the four-color button.")
@@ -439,6 +472,10 @@ def restore(device: Device, language: str) -> None:
         raise SetupError("Restore is incomplete: the previous Home app is not selected.")
     if home_receiver_state(device) != receiver:
         raise SetupError("Restore is incomplete: the Home button receiver differs.")
+    for name, previous in (("tv_home_bridge_home_component", state["selected_launcher"]),
+                           ("tv_home_bridge_color_action", state["color_action"])):
+        if device.shell("settings", "get", "global", name) != previous:
+            raise SetupError(f"Restore is incomplete: {name} differs.")
     if virtualkey["system_only"] and device.package_path("com.example.tl_virtualkey") != ORIGINAL_VIRTUALKEY_PATH:
         raise SetupError("Restore is incomplete: the original virtual-key app is not active.")
     for package in BACKUP_PACKAGES[:-1]:
@@ -466,8 +503,8 @@ def setup(language: str) -> None:
     print(f"SAM TV Launcher {VERSION}")
     say(language, "تلویزیون و رایانه باید به یک شبکهٔ خانگی وصل باشند.",
         "Connect the TV and computer to the same home network.")
-    action = input(tr(language, "کار مورد نظر: [1] نصب  [2] بازگرداندن تنظیم قبلی  [3] شناسایی بدون تغییر (Enter = نصب): ",
-                      "Choose: [1] Install  [2] Restore previous setup  [3] Read-only discovery (Enter = Install): ")).strip()
+    action = input(tr(language, "کار مورد نظر: [1] نصب  [2] بازیابی  [3] شناسایی بدون تغییر  [4] آزمون و نصب آزمایشی (Enter = نصب): ",
+                      "Choose: [1] Install  [2] Restore  [3] Read-only discovery  [4] Experimental trial (Enter = Install): ")).strip()
     address = input(tr(language, "آدرس IP تلویزیون: ", "TV IP address: ")).strip()
     try:
         ipaddress.ip_address(address)
@@ -483,31 +520,55 @@ def setup(language: str) -> None:
         device.connect()
         restore(device, language)
         return
-    if action == "3":
+    if action in {"3", "4"}:
         device.connect()
         inspect_device(device, language)
-        return
-    if action not in {"", "1"}:
+        if action == "3":
+            if not prompt_yes(language,
+                              "فقط اگر خواستید بررسی سخت‌گیرانهٔ نصب را هم اجرا کنید. ادامه می‌دهید؟",
+                              "Run the strict installation check too? Continue?", default=False):
+                return
+            say(language,
+                "ادامه فقط در صورت تطابق کامل با نسخهٔ آزمایش‌شده ممکن است؛ این بررسی هم چیزی نصب نمی‌کند.",
+                "Installation can continue only if this TV exactly matches the tested profile; this check installs nothing.")
+        else:
+            say(language,
+                "هشدار آزمون: این مسیر روی مدل شما تأیید نشده است. نصب موقت می‌تواند Home یا HDMI را از کار بیندازد. برنامه قبل از تغییر نسخهٔ پشتیبان می‌گیرد و اگر آزمون رد شود، بازیابی را امتحان می‌کند؛ ولی اگر تلویزیون روشن نشود یا ADB قطع شود، بازگشت خودکار ممکن نیست. هیچ پارتیشن فریمور تغییر نمی‌کند.",
+                "Experimental warning: this TV has not been verified. The trial may break Home or HDMI. A backup is saved first and the installer attempts restore if the trial fails, but automatic restore cannot work if the TV stops booting or ADB becomes unreachable. Firmware partitions are not changed.")
+            consent = input(tr(language, "اگر این خطر را می‌پذیرید، EXPERIMENT را بنویسید: ",
+                               "Type EXPERIMENT to accept this risk: ")).strip()
+            if consent != "EXPERIMENT":
+                say(language, "آزمون لغو شد؛ چیزی نصب نشد.", "Trial cancelled; nothing was installed.")
+                return
+    if action not in {"", "1", "3", "4"}:
         raise SetupError("Unknown option. / گزینهٔ واردشده معتبر نیست.")
     say(language, "در حال اتصال و بررسی سازگاری. اگر پیامی روی تلویزیون آمد، اجازه دهید...",
         "Connecting and checking compatibility. Accept any TV authorization prompt...")
     device.connect()
     with tempfile.TemporaryDirectory(prefix="samtv-check-") as temporary:
-        check_compatibility(device, Path(temporary))
-    say(language, "بررسی موفق بود؛ هنوز چیزی روی تلویزیون تغییر نکرده است.",
-        "Compatibility check passed; no TV settings have changed yet.")
+        check_compatibility(device, Path(temporary), experimental=action == "4")
+    if action == "4":
+        say(language, "پیش‌نیازهای آزمون موجودند؛ سازگاری این مدل هنوز تأیید نشده و چیزی تغییر نکرده است.",
+            "Trial prerequisites are present; this model is still unverified and nothing has changed yet.")
+    else:
+        say(language, "بررسی موفق بود؛ هنوز چیزی روی تلویزیون تغییر نکرده است.",
+            "Compatibility check passed; no TV settings have changed yet.")
     choose = prompt_yes(language, "میان‌بر Choose Home نصب شود؟", "Install the Choose Home shortcut?")
     settings = prompt_yes(language, "میان‌بر TV Settings نصب شود؟", "Install the TV Settings shortcut?")
     projectivy = prompt_yes(language, "لانچر Projectivy نصب و پیش‌فرض شود؟ (پیشنهادی)",
                            "Install and select Projectivy Launcher? (recommended)")
     ltv = prompt_yes(language, "لانچر LTvLauncher هم نصب شود؟",
                      "Also install LTvLauncher?", default=False)
+    say(language,
+        "هشدار: نصب، تنظیم دکمه‌ها و صفحهٔ خانه را تغییر می‌دهد. نسخهٔ پشتیبان پیش از تغییر ذخیره می‌شود، اما بازیابی فقط تا زمانی ممکن است که تلویزیون روشن شود و ADB در دسترس باشد. اگر آزمون دکمه‌ها موفق نبود، از همین پوشه گزینهٔ بازیابی را اجرا کنید.",
+        "Warning: installation changes Home and remote-button behavior. A backup is saved first, but restore requires the TV to boot and ADB to remain available. If the button test fails, run Restore from this folder.")
     confirmation = input(tr(language, "برای شروع نصب، «نصب» یا INSTALL را بنویسید: ",
                             "Type INSTALL to begin: ")).strip()
     if confirmation not in {"INSTALL", "نصب"}:
         say(language, "نصب لغو شد؛ تغییری انجام نشد.", "Setup cancelled; nothing changed.")
         return
-    install(device, language, choose, settings, projectivy, ltv)
+    install(device, language, choose, settings, projectivy, ltv,
+            experimental=action == "4")
 
 
 def main() -> int:
@@ -532,8 +593,12 @@ def main() -> int:
     parser.add_argument("--skip-tv-settings", action="store_true")
     parser.add_argument("--skip-projectivy", action="store_true")
     parser.add_argument("--install-ltv", action="store_true")
+    parser.add_argument("--experimental", action="store_true",
+                        help="Run a reversible trial on an unverified Android 11 Realtek TV")
     parser.add_argument("--apk-dir", type=Path, help="Use local verified APKs instead of downloading")
     args = parser.parse_args()
+    if args.experimental and args.command != "install":
+        parser.error("--experimental is available only with the install command")
     language = args.language or ("fa" if args.command == "setup" else "en")
     try:
         if args.command == "setup":
@@ -553,8 +618,16 @@ def main() -> int:
                 check_compatibility(device, Path(temporary))
             say(language, "این تلویزیون برای این نسخه بررسی شد.", "Compatibility check passed.")
         elif args.command == "install":
+            if args.experimental:
+                say(language,
+                    "این نصب آزمایشی ممکن است Home یا HDMI را مختل کند. بازگشت خودکار فقط با روشن‌بودن تلویزیون و اتصال ADB ممکن است. برای پذیرش، EXPERIMENT را بنویسید.",
+                    "This experimental install may disrupt Home or HDMI. Automatic restore needs a booting TV and working ADB. Type EXPERIMENT to proceed.")
+                if input("> ").strip() != "EXPERIMENT":
+                    say(language, "آزمون لغو شد.", "Trial cancelled.")
+                    return 0
             install(device, language, not args.skip_choose_home, not args.skip_tv_settings,
-                    not args.skip_projectivy, args.install_ltv, args.apk_dir)
+                    not args.skip_projectivy, args.install_ltv, args.apk_dir,
+                    experimental=args.experimental)
         else:
             confirmation = input(tr(language, "برای بازیابی، «بازیابی» یا RESTORE را بنویسید: ",
                                     "Type RESTORE to continue: ")).strip()

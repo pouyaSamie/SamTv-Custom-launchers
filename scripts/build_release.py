@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the local Windows and Linux 0.1.4 installation ZIPs."""
+"""Build the local Windows and Linux installation archives."""
 from pathlib import Path
 import sys
 import tarfile
