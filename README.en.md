@@ -2,7 +2,9 @@
 
 [فارسی](README.md) · Version **0.1.4**
 
-Press **Home** and see Projectivy instead of the Sambazar ribbon. Press **Source/Input** to choose an HDMI input as usual. Press the **four colored dots** on the remote to open the TV's Picture, Sound, and other settings. Later, you can choose a different Home screen or change what the colored button opens.
+This project started with a small frustration on our own TV: pressing Home brought up the Sambazar ribbon. We wanted a different Home screen while keeping the HDMI selector and the TV's own settings working. These are the changes that worked on our set, packaged for other compatible TVs.
+
+With the recommended choices, **Home** opens **Projectivy**, **Source/Input** still chooses an HDMI input, and the remote's **four colored dots** open the TV's Picture and Sound settings. You can change the Home screen or the colored button later.
 
 <img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="480" alt="Example of the Projectivy Home screen">
 
@@ -10,11 +12,13 @@ Press **Home** and see Projectivy instead of the Sambazar ribbon. Press **Source
 
 The TV's original software stays installed so HDMI and other TV functions can work. This installer does not reset the TV or erase your personal apps.
 
-## Before you start
+## Will it work on my TV?
 
-This release was tested on a **SAM R4 with Android 11** and the matching TV software. The installer checks the model and software before it installs anything. If your TV is different, it stops and tells you; do not try to force the installation.
+Version **0.1.4** was tested on one **SAM R4 running Android 11**. The installer checks more than the model name: it compares required TV software with the tested set. Another TV may also say R4 and still fail the check.
 
-You need the TV and its remote, a **64-bit Windows or Linux PC with an Intel/AMD processor**, and an internet connection on the computer. Connect the TV and computer to the **same home network**. Keep the TV on while you install. The TV also needs internet if you use its browser to get Activity Launcher.
+If you only want to check your TV, follow the steps below until the installer shows the compatibility result. **It installs nothing unless you type `INSTALL` at the final prompt.** Passing this check alone does not prove that every remote button will work on another TV. Share the TV model, Android version, and result or error message in [Issues](https://github.com/pouyaSamie/SamTv-Custom-launchers/issues). Do not share backups or personal data. The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-014) give the exact conditions.
+
+To install, you need the TV and its remote, a **64-bit Windows or Linux PC with an Intel/AMD processor**, and internet access on the computer. Connect both devices to the **same home network** and keep the TV on. The TV also needs internet if you use its browser to get Activity Launcher.
 
 ## Install, step by step
 

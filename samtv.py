@@ -159,8 +159,8 @@ def check_compatibility(device: Device, working: Path) -> tuple[Path, Path]:
     realtek = working / "RtkLiveTv.apk"
     virtualkey = working / "Tl_VirtualKey.apk"
     device.pull_package("com.realtek.tv", realtek)
-    # pm path points at an installed update when one exists. Compare the
-    # untouched system APK so a previously configured TV remains eligible.
+    # pm path may point to an installed update; this hash checks the active TV APK.
+    # VirtualKey is read from its original system path below.
     if not device.shell("pm", "path", "com.example.tl_virtualkey").startswith("package:"):
         raise SetupError("Required TV app is missing: com.example.tl_virtualkey")
     device.run("pull", ORIGINAL_VIRTUALKEY_PATH, str(virtualkey), timeout=180)
