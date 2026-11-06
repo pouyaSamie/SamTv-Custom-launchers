@@ -2,9 +2,11 @@
 
 import json
 import hashlib
+import io
 from pathlib import Path
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from unittest.mock import patch
 
 import samtv
@@ -72,6 +74,17 @@ class FakeDevice:
 
 
 class RestoreTests(unittest.TestCase):
+    def test_probe_reads_only_on_an_unknown_model(self):
+        device = FakeDevice()
+        device.paths.pop("com.realtek.tv", None)
+        device.paths.pop("com.realtek.menu", None)
+        with redirect_stdout(io.StringIO()) as output:
+            samtv.inspect_device(device, "en")
+        self.assertIn("com.realtek.tv: missing", output.getvalue())
+        self.assertIn("Home and HDMI were not tested", output.getvalue())
+        self.assertTrue(all(command[0] in {"getprop", "pm", "su"}
+                            for command in device.commands))
+
     def test_download_checks_hash_and_cleans_failed_file(self):
         class Response:
             def __init__(self, payload):

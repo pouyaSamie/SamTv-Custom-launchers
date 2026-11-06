@@ -30,6 +30,8 @@ For a read-only check, prepare ADB on the candidate TV and run `python3 samtv.py
 
 An unfamiliar model must be able to reach a **read-only discovery result** without being rejected merely because its model or board name differs. This result is evidence for deciding whether an adapter can be built; it is not a working Home/HDMI test. Do not expose an `ignore compatibility` switch that runs the R4 installation sequence on another board.
 
+The source checkout now provides `python3 samtv.py probe --serial TV_IP:5555`, and the setup wizard has option 3 for the same read-only discovery. It prints model, Android/board/software properties, presence of expected packages and `rtk-framework`, and whether `su 0 id` works. It does not install APKs or change TV settings. The published 0.1.4 Windows/Linux archives predate this command; a new release must be built and verified before promising it to nontechnical users.
+
 A future guided trial needs these separate gates:
 
 1. **Discover:** read Android version, board, active TV and key packages, framework libraries, signatures, Home handlers, and available ADB privileges. Keep the diagnostic report on the user's computer. Redact device identifiers before any issue report.

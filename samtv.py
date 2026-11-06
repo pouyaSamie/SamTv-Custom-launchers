@@ -176,6 +176,35 @@ def check_compatibility(device: Device, working: Path) -> tuple[Path, Path]:
     return realtek, virtualkey
 
 
+def inspect_device(device: Device, language: str) -> None:
+    """Read candidate-TV capabilities without installing or changing settings."""
+    properties = (
+        ("Model", "ro.product.model"),
+        ("Android", "ro.build.version.release"),
+        ("Hardware", "ro.hardware"),
+        ("Board", "ro.product.board"),
+        ("Software", "ro.software.version_id"),
+    )
+    say(language, "مشخصات تلویزیون (هیچ تنظیمی تغییر نمی‌کند):",
+        "TV information (no settings are changed):")
+    for label, property_name in properties:
+        print(f"{label}: {device.shell('getprop', property_name) or '—'}")
+    for package in ("com.realtek.tv", "com.example.tl_virtualkey",
+                    "com.realtek.menu", "com.google.android.tvlauncher"):
+        path = device.package_path(package)
+        print(f"{package}: {'present' if path else 'missing'}")
+    libraries = device.shell("pm", "list", "libraries")
+    print(f"rtk-framework: {'present' if 'rtk-framework' in libraries else 'missing'}")
+    try:
+        root = "uid=0(root)" in device.shell("su", "0", "id")
+    except SetupError:
+        root = False
+    print(f"ADB root: {'available' if root else 'unavailable'}")
+    say(language,
+        "این فقط شناسایی اولیه است؛ Home و HDMI آزمایش نشده‌اند و نصب برای این مدل تأیید نشده است.",
+        "This is discovery only. Home and HDMI were not tested; installation is not approved for this model.")
+
+
 def required_apks(device: Device, choose: bool, settings: bool,
                   projectivy: bool, ltv: bool) -> list[str]:
     keys = ["bridge", "virtualkey"]
@@ -437,8 +466,8 @@ def setup(language: str) -> None:
     print(f"SAM TV Launcher {VERSION}")
     say(language, "تلویزیون و رایانه باید به یک شبکهٔ خانگی وصل باشند.",
         "Connect the TV and computer to the same home network.")
-    action = input(tr(language, "کار مورد نظر: [1] نصب  [2] بازگرداندن تنظیم قبلی (Enter = نصب): ",
-                      "Choose: [1] Install  [2] Restore previous setup (Enter = Install): ")).strip()
+    action = input(tr(language, "کار مورد نظر: [1] نصب  [2] بازگرداندن تنظیم قبلی  [3] شناسایی بدون تغییر (Enter = نصب): ",
+                      "Choose: [1] Install  [2] Restore previous setup  [3] Read-only discovery (Enter = Install): ")).strip()
     address = input(tr(language, "آدرس IP تلویزیون: ", "TV IP address: ")).strip()
     try:
         ipaddress.ip_address(address)
@@ -454,6 +483,12 @@ def setup(language: str) -> None:
         device.connect()
         restore(device, language)
         return
+    if action == "3":
+        device.connect()
+        inspect_device(device, language)
+        return
+    if action not in {"", "1"}:
+        raise SetupError("Unknown option. / گزینهٔ واردشده معتبر نیست.")
     say(language, "در حال اتصال و بررسی سازگاری. اگر پیامی روی تلویزیون آمد، اجازه دهید...",
         "Connecting and checking compatibility. Accept any TV authorization prompt...")
     device.connect()
@@ -490,8 +525,8 @@ def main() -> int:
                              stderr=subprocess.DEVNULL, start_new_session=True)
             return 0
     parser = argparse.ArgumentParser(description=f"SAM TV Launcher {VERSION}")
-    parser.add_argument("command", nargs="?", choices=("setup", "check", "install", "restore"), default="setup")
-    parser.add_argument("--serial", help="TV_IP:5555; required for check/install/restore")
+    parser.add_argument("command", nargs="?", choices=("setup", "probe", "check", "install", "restore"), default="setup")
+    parser.add_argument("--serial", help="TV_IP:5555; required for probe/check/install/restore")
     parser.add_argument("--language", choices=("fa", "en"))
     parser.add_argument("--skip-choose-home", action="store_true")
     parser.add_argument("--skip-tv-settings", action="store_true")
@@ -511,7 +546,9 @@ def main() -> int:
             parser.error("--serial is required for this command")
         device = Device(args.serial)
         device.connect()
-        if args.command == "check":
+        if args.command == "probe":
+            inspect_device(device, language)
+        elif args.command == "check":
             with tempfile.TemporaryDirectory(prefix="samtv-check-") as temporary:
                 check_compatibility(device, Path(temporary))
             say(language, "این تلویزیون برای این نسخه بررسی شد.", "Compatibility check passed.")
