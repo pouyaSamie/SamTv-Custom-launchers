@@ -4,7 +4,7 @@
 
 One frustration with SAM TVs is how little you can change the Home screen and app ribbon. Even with capable hardware, that makes everyday use more cumbersome.
 
-This project puts the Home screen choice in your hands. You can choose which launcher opens with the Home button, add a shortcut to TV settings, and change what the four-color button does. HDMI switching and the TV's settings remain available.
+This project lets you choose your TV's Home screen and add the features you find useful.
 
 <img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="480" alt="Example of the Projectivy Home screen">
 
@@ -16,9 +16,9 @@ The TV's original software stays installed. This installer does not reset the TV
 
 We tested the package on one **SAM R4 running Android 11**. The installer checks the TV's software as well as its model name. Another R4 may still fail the normal installation check.
 
-If you have another model or board, start with **Read-only discovery**. It shows the TV's basic details without installing anything. To try Home and HDMI, choose **Experimental trial**. Failing the normal check does not mean this approach cannot work on your TV.
+If you have another model or board, start with **Read-only discovery**. It shows the TV's basic details without installing anything. To check whether this setup works on your TV, choose **Experimental trial**. Failing the normal check does not mean this approach cannot work on your TV.
 
-The experimental trial in **0.1.6** has not been field-tested on another model. It proceeds only on **Android 11** TVs with the required apps and access. The installer saves a backup, then asks you to test Home, HDMI, four-color, audio, and picture with the physical remote. Press **`y`** to continue if everything works; **`n`** or Enter starts restore. **Automatic restore requires the TV to boot and ADB to remain available.** The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-016) list the exact requirements.
+The experimental trial in **0.1.6** has not been field-tested on another model. It proceeds only on **Android 11** TVs with the required apps and access. The installer saves a backup, then asks you to check several TV functions with the physical remote. Press **`y`** to continue if everything works; **`n`** or Enter starts restore. **Automatic restore requires the TV to boot and ADB to remain available.** The [installation guide](docs/INSTALL.en.md) explains the checks and recovery steps.
 
 You can share the TV model and Android version in [Issues](https://github.com/pouyaSamie/SamTv-Custom-launchers/issues); do not share backups or personal data.
 
@@ -32,11 +32,11 @@ To install, you need the TV and its remote, a **64-bit Windows or Linux PC with 
 4. **Download the computer installer.** Choose [Windows](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/SAM-TV-v0.1.6-windows.zip) or [Linux](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/SAM-TV-v0.1.6-linux.tar.gz), then extract the downloaded file. Do not run the installer from inside the ZIP or TAR.GZ file.
 5. **Run it on the computer.** On Windows, double-click `Install-SAM-TV.cmd` in the extracted folder. On Linux, run `Install-SAM-TV` from that folder. If Linux does not offer a Run option, see [the detailed guide](docs/INSTALL.en.md).
 6. **Answer the prompts.** Press **`n`** for English, then **Enter** for normal installation and again to skip the experimental trial. Enter the TV's IP address. If the TV asks for permission, select **Allow** with the remote. After the compatibility check, press **Enter** at each of the four app questions. This installs Choose Home, TV Settings, and Projectivy, and skips LTvLauncher. Read the warning and press **`y`** to start installation. Enter at this question cancels it.
-7. **Try the remote.** Home should open Projectivy. Use Source/Input to choose an HDMI input and press **OK once**. The four colored dots should open TV Settings. Check these three buttons again after restarting the TV.
+7. **Check the result.** Home should open Projectivy. Then follow the [post-installation checks](docs/INSTALL.en.md).
 
 Keep the extracted installer folder. Its `backups` folder is needed if you want to restore your previous setup. It contains information from your TV, so keep it private. You do not need to download or transfer APK files yourself.
 
-**If you have another model:** Press **Enter** when asked about installation, then **`y`** when asked about an unverified TV. Read the warning and press **`y`** again only if you accept the risk. When the trial is ready, test the remote and HDMI. If everything works, **`y`** continues installation; **`n`** or Enter starts restore. Read the [trial and recovery guide](docs/INSTALL.en.md) first.
+**If you have another model:** Press **Enter** when asked about installation, then **`y`** when asked about an unverified TV. Read the warning and press **`y`** again only if you accept the risk. When the trial is ready, check the functions it asks you to test. If everything works, **`y`** continues installation; **`n`** or Enter starts restore. Read the [trial and recovery guide](docs/INSTALL.en.md) first.
 
 ## Change your choices later
 
@@ -46,7 +46,7 @@ Open **Choose Home** from the TV's apps to select another installed Home screen.
 
 *Examples of [Google Android TV Home](https://play.google.com/store/apps/details?id=com.google.android.tvlauncher) and [LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher). The appearance on your TV may differ.*
 
-Open **Remote Buttons** to make the four-color button open an installed app or the original Sambazar ribbon. We recommend leaving it set to **TV Settings**, so the TV's Picture and Sound menu is always one button away. The **TV Settings** app is also available as a separate shortcut if you included it during setup.
+See the [installation guide](docs/INSTALL.en.md) to change what the remote buttons do and review the recommended settings.
 
 ## If something goes wrong
 
