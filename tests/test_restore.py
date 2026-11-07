@@ -81,7 +81,7 @@ class FakeDevice:
 class RestoreTests(unittest.TestCase):
     def test_wizard_requires_experiment_acknowledgment(self):
         device = FakeDevice()
-        answers = iter(("4", "192.168.1.50", "NO"))
+        answers = iter(("y", "y", "192.168.1.50", "n"))
         with patch.object(samtv, "Device", return_value=device), \
              patch.object(samtv, "inspect_device"), \
              patch.object(samtv, "check_compatibility") as check, \
@@ -89,6 +89,43 @@ class RestoreTests(unittest.TestCase):
             samtv.setup("en")
         check.assert_not_called()
         self.assertEqual(device.commands, [("connect",)])
+
+    def test_normal_wizard_needs_only_ip_text(self):
+        device = FakeDevice()
+        answers = iter(("", "", "192.168.1.50", "", "", "", "", "n"))
+        with patch.object(samtv, "Device", return_value=device), \
+             patch.object(samtv, "check_compatibility") as check, \
+             patch("builtins.input", side_effect=lambda _prompt="": next(answers)):
+            samtv.setup("en")
+        check.assert_called_once()
+        self.assertEqual(device.commands, [("connect",)])
+
+    def test_restore_wizard_uses_yes_no_only(self):
+        device = FakeDevice()
+        answers = iter(("n", "y", "192.168.1.50", "y"))
+        with patch.object(samtv, "Device", return_value=device), \
+             patch.object(samtv, "restore") as restore, \
+             patch("builtins.input", side_effect=lambda _prompt="": next(answers)):
+            samtv.setup("en")
+        restore.assert_called_once_with(device, "en")
+        self.assertEqual(device.commands, [("connect",)])
+
+    def test_read_only_wizard_uses_yes_no_only(self):
+        device = FakeDevice()
+        answers = iter(("n", "", "192.168.1.50", ""))
+        with patch.object(samtv, "Device", return_value=device), \
+             patch.object(samtv, "inspect_device") as inspect, \
+             patch.object(samtv, "check_compatibility") as check, \
+             patch("builtins.input", side_effect=lambda _prompt="": next(answers)):
+            samtv.setup("en")
+        inspect.assert_called_once_with(device, "en")
+        check.assert_not_called()
+        self.assertEqual(device.commands, [("connect",)])
+
+    def test_yes_no_prompt_retries_invalid_answer(self):
+        with patch("builtins.input", side_effect=("maybe", "n")) as ask:
+            self.assertFalse(samtv.prompt_yes("en", "ادامه؟", "Continue?"))
+        self.assertEqual(ask.call_count, 2)
 
     def test_experimental_gate_accepts_other_board_with_required_services(self):
         class Candidate:
@@ -139,7 +176,7 @@ class RestoreTests(unittest.TestCase):
                  patch.object(samtv, "load_restore_point") as load_backup, \
                  patch.object(samtv, "restore") as restore, \
                  patch.object(samtv, "APK_SHA256", checksums), \
-                 patch("builtins.input", return_value="FAIL"):
+                 patch("builtins.input", return_value="n"):
                 load_backup.side_effect = lambda _device: (
                     next((Path(folder) / "backups").iterdir()), {})
                 with self.assertRaisesRegex(samtv.SetupError, "previous setup was restored"):
@@ -166,7 +203,7 @@ class RestoreTests(unittest.TestCase):
                  patch.object(samtv, "load_restore_point") as load_backup, \
                  patch.object(samtv, "restore") as restore, \
                  patch.object(samtv, "APK_SHA256", checksums), \
-                 patch("builtins.input", return_value="PASS"):
+                 patch("builtins.input", return_value="y"):
                 load_backup.side_effect = lambda _device: (
                     next((Path(folder) / "backups").iterdir()), {})
                 samtv.install(device, "en", True, True, True, False, apks,

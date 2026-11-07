@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAM TV Launcher 0.1.5 setup and recovery. Standard library only."""
+"""SAM TV Launcher 0.1.6 setup and recovery. Standard library only."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-VERSION = "0.1.5"
+VERSION = "0.1.6"
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 TESTED_REALTEK = "6b2939ee1e30f2c13534692022831f843aa4f587eeee6991e5fbcf6340cad652"
 TESTED_VIRTUALKEY = "3fb39f1da8b17967dddedb7c3828178201e1f474fc7ed097fe3da4111b88e73e"
@@ -411,10 +411,11 @@ def install(device: Device, language: str, choose: bool, settings: bool,
             raise SetupError("Home receiver did not stay disabled.")
         if experimental:
             say(language,
-                "آزمون موقت آماده است. با کنترل واقعی، Home، انتخاب HDMI با یک OK، دکمهٔ چهاررنگ، صدا و تصویر را امتحان کنید. اگر همه درست بود، PASS را بنویسید؛ هر پاسخ دیگر تنظیم قبلی را برمی‌گرداند.",
-                "Trial is ready. With the physical remote, test Home, HDMI selection with one OK, four-color, audio and picture. Type PASS only if all work; any other answer restores the previous setup.")
-            if input(tr(language, "نتیجهٔ آزمون (PASS یا هر پاسخ دیگر): ",
-                        "Trial result (PASS or anything else): ")).strip() != "PASS":
+                "آزمون موقت آماده است. با کنترل واقعی، Home، انتخاب HDMI با یک OK، دکمهٔ چهاررنگ، صدا و تصویر را امتحان کنید.",
+                "Trial is ready. With the physical remote, test Home, HDMI selection with one OK, four-color, audio and picture.")
+            if not prompt_yes(language,
+                              "آیا همهٔ موارد درست کار کردند و می‌خواهید نصب کامل شود؟",
+                              "Did everything work, and should installation continue?", default=False):
                 raise SetupError("The trial was not approved. / آزمون تأیید نشد.")
             device.connect()
             if choose:
@@ -493,37 +494,47 @@ def restore(device: Device, language: str) -> None:
 
 
 def prompt_yes(language: str, fa: str, en: str, default: bool = True) -> bool:
-    answer = input(tr(language, fa, en) + (" [Y/n] " if default else " [y/N] ")).strip().lower()
-    if not answer:
-        return default
-    return answer in {"y", "yes", "بله", "آری", "اره"}
+    while True:
+        answer = input(tr(language, fa, en) + (" [Y/n] " if default else " [y/N] ")).strip().lower()
+        if not answer:
+            return default
+        if answer in {"y", "n"}:
+            return answer == "y"
+        say(language, "فقط y یا n را بزنید، یا برای گزینهٔ پیش‌فرض Enter بزنید.",
+            "Press y or n, or Enter for the default choice.")
 
 
 def setup(language: str) -> None:
     print(f"SAM TV Launcher {VERSION}")
     say(language, "تلویزیون و رایانه باید به یک شبکهٔ خانگی وصل باشند.",
         "Connect the TV and computer to the same home network.")
-    action = input(tr(language, "کار مورد نظر: [1] نصب  [2] بازیابی  [3] شناسایی بدون تغییر  [4] آزمون و نصب آزمایشی (Enter = نصب): ",
-                      "Choose: [1] Install  [2] Restore  [3] Read-only discovery  [4] Experimental trial (Enter = Install): ")).strip()
+    if prompt_yes(language, "می‌خواهید برنامه‌ها را روی تلویزیون نصب کنید؟",
+                  "Do you want to install the TV apps?"):
+        action = "experimental" if prompt_yes(
+            language, "می‌خواهید روی مدل بررسی‌نشده آزمون آزمایشی انجام دهید؟",
+            "Is this an experimental trial on an unverified TV?", default=False) else "install"
+    else:
+        action = "restore" if prompt_yes(
+            language, "می‌خواهید تنظیم قبلی تلویزیون را بازیابی کنید؟",
+            "Do you want to restore the previous TV setup?", default=False) else "probe"
     address = input(tr(language, "آدرس IP تلویزیون: ", "TV IP address: ")).strip()
     try:
         ipaddress.ip_address(address)
     except ValueError as exc:
         raise SetupError("Enter a valid TV IP address. / آدرس IP معتبر وارد کنید.") from exc
     device = Device(f"{address}:5555")
-    if action == "2":
-        confirmation = input(tr(language, "برای بازیابی، «بازیابی» یا RESTORE را بنویسید: ",
-                                "Type RESTORE to continue: ")).strip()
-        if confirmation not in {"RESTORE", "بازیابی"}:
+    if action == "restore":
+        if not prompt_yes(language, "بازیابی تنظیم قبلی شروع شود؟",
+                          "Start restoring the previous setup?", default=False):
             say(language, "بازیابی لغو شد.", "Restore cancelled.")
             return
         device.connect()
         restore(device, language)
         return
-    if action in {"3", "4"}:
+    if action in {"probe", "experimental"}:
         device.connect()
         inspect_device(device, language)
-        if action == "3":
+        if action == "probe":
             if not prompt_yes(language,
                               "فقط اگر خواستید بررسی سخت‌گیرانهٔ نصب را هم اجرا کنید. ادامه می‌دهید؟",
                               "Run the strict installation check too? Continue?", default=False):
@@ -535,19 +546,16 @@ def setup(language: str) -> None:
             say(language,
                 "هشدار آزمون: این مسیر روی مدل شما تأیید نشده است. نصب موقت می‌تواند Home یا HDMI را از کار بیندازد. برنامه قبل از تغییر نسخهٔ پشتیبان می‌گیرد و اگر آزمون رد شود، بازیابی را امتحان می‌کند؛ ولی اگر تلویزیون روشن نشود یا ADB قطع شود، بازگشت خودکار ممکن نیست. هیچ پارتیشن فریمور تغییر نمی‌کند.",
                 "Experimental warning: this TV has not been verified. The trial may break Home or HDMI. A backup is saved first and the installer attempts restore if the trial fails, but automatic restore cannot work if the TV stops booting or ADB becomes unreachable. Firmware partitions are not changed.")
-            consent = input(tr(language, "اگر این خطر را می‌پذیرید، EXPERIMENT را بنویسید: ",
-                               "Type EXPERIMENT to accept this risk: ")).strip()
-            if consent != "EXPERIMENT":
+            if not prompt_yes(language, "خطر را می‌پذیرید و می‌خواهید آزمون را شروع کنید؟",
+                              "Do you accept the risk and want to start the trial?", default=False):
                 say(language, "آزمون لغو شد؛ چیزی نصب نشد.", "Trial cancelled; nothing was installed.")
                 return
-    if action not in {"", "1", "3", "4"}:
-        raise SetupError("Unknown option. / گزینهٔ واردشده معتبر نیست.")
     say(language, "در حال اتصال و بررسی سازگاری. اگر پیامی روی تلویزیون آمد، اجازه دهید...",
         "Connecting and checking compatibility. Accept any TV authorization prompt...")
     device.connect()
     with tempfile.TemporaryDirectory(prefix="samtv-check-") as temporary:
-        check_compatibility(device, Path(temporary), experimental=action == "4")
-    if action == "4":
+        check_compatibility(device, Path(temporary), experimental=action == "experimental")
+    if action == "experimental":
         say(language, "پیش‌نیازهای آزمون موجودند؛ سازگاری این مدل هنوز تأیید نشده و چیزی تغییر نکرده است.",
             "Trial prerequisites are present; this model is still unverified and nothing has changed yet.")
     else:
@@ -562,13 +570,11 @@ def setup(language: str) -> None:
     say(language,
         "هشدار: نصب، تنظیم دکمه‌ها و صفحهٔ خانه را تغییر می‌دهد. نسخهٔ پشتیبان پیش از تغییر ذخیره می‌شود، اما بازیابی فقط تا زمانی ممکن است که تلویزیون روشن شود و ADB در دسترس باشد. اگر آزمون دکمه‌ها موفق نبود، از همین پوشه گزینهٔ بازیابی را اجرا کنید.",
         "Warning: installation changes Home and remote-button behavior. A backup is saved first, but restore requires the TV to boot and ADB to remain available. If the button test fails, run Restore from this folder.")
-    confirmation = input(tr(language, "برای شروع نصب، «نصب» یا INSTALL را بنویسید: ",
-                            "Type INSTALL to begin: ")).strip()
-    if confirmation not in {"INSTALL", "نصب"}:
+    if not prompt_yes(language, "نصب شروع شود؟", "Start installation?", default=False):
         say(language, "نصب لغو شد؛ تغییری انجام نشد.", "Setup cancelled; nothing changed.")
         return
     install(device, language, choose, settings, projectivy, ltv,
-            experimental=action == "4")
+            experimental=action == "experimental")
 
 
 def main() -> int:
@@ -603,8 +609,8 @@ def main() -> int:
     try:
         if args.command == "setup":
             if args.language is None:
-                selection = input("زبان / Language: [1] فارسی  [2] English (Enter = فارسی): ").strip()
-                language = "en" if selection == "2" else "fa"
+                language = "fa" if prompt_yes("fa", "زبان فارسی؟ / Persian language?",
+                                               "Use Persian?") else "en"
             setup(language)
             return 0
         if not args.serial:
@@ -620,18 +626,18 @@ def main() -> int:
         elif args.command == "install":
             if args.experimental:
                 say(language,
-                    "این نصب آزمایشی ممکن است Home یا HDMI را مختل کند. بازگشت خودکار فقط با روشن‌بودن تلویزیون و اتصال ADB ممکن است. برای پذیرش، EXPERIMENT را بنویسید.",
-                    "This experimental install may disrupt Home or HDMI. Automatic restore needs a booting TV and working ADB. Type EXPERIMENT to proceed.")
-                if input("> ").strip() != "EXPERIMENT":
+                    "این نصب آزمایشی ممکن است Home یا HDMI را مختل کند. بازگشت خودکار فقط با روشن‌بودن تلویزیون و اتصال ADB ممکن است.",
+                    "This experimental install may disrupt Home or HDMI. Automatic restore needs a booting TV and working ADB.")
+                if not prompt_yes(language, "خطر را می‌پذیرید و می‌خواهید ادامه دهید؟",
+                                  "Do you accept the risk and want to continue?", default=False):
                     say(language, "آزمون لغو شد.", "Trial cancelled.")
                     return 0
             install(device, language, not args.skip_choose_home, not args.skip_tv_settings,
                     not args.skip_projectivy, args.install_ltv, args.apk_dir,
                     experimental=args.experimental)
         else:
-            confirmation = input(tr(language, "برای بازیابی، «بازیابی» یا RESTORE را بنویسید: ",
-                                    "Type RESTORE to continue: ")).strip()
-            if confirmation in {"RESTORE", "بازیابی"}:
+            if prompt_yes(language, "بازیابی تنظیم قبلی شروع شود؟",
+                          "Start restoring the previous setup?", default=False):
                 restore(device, language)
             else:
                 say(language, "بازیابی لغو شد.", "Restore cancelled.")

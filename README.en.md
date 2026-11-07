@@ -1,6 +1,6 @@
 # Change the Home screen and remote buttons on SAM TV
 
-[فارسی](README.md) · Version **0.1.5**
+[فارسی](README.md) · Version **0.1.6**
 
 This project started with a small frustration on our own TV: pressing Home brought up the Sambazar ribbon. We wanted a different Home screen while keeping the HDMI selector and the TV's own settings working. These are the changes that worked on our set, packaged for other compatible TVs.
 
@@ -14,11 +14,11 @@ The TV's original software stays installed so HDMI and other TV functions can wo
 
 ## Will it work on my TV?
 
-The TV-side package was tested on one **SAM R4 running Android 11**. The installer checks more than the model name: it compares required TV software with the tested set. Another TV may also say R4 and still fail the normal check. The new experimental path in **0.1.5** has not been field-tested on another model.
+The TV-side package was tested on one **SAM R4 running Android 11**. The installer checks more than the model name: it compares required TV software with the tested set. Another TV may also say R4 and still fail the normal check. The new experimental path in **0.1.6** has not been field-tested on another model.
 
 If your device does not report R4 or has a different board family, you can choose **Read-only discovery**. It shows basic TV properties without installing anything or testing Home and HDMI. A separate **Experimental trial** option lets you try the setup after a warning. A rejected normal check does not prove the approach is impossible on your TV.
 
-The experimental trial proceeds only on **Android 11** TVs with the required apps and access. It saves a backup, then asks you to test Home, HDMI, four-color, audio, and picture with the physical remote. Type `PASS` only if they all work; any other response starts restore. **Automatic restore cannot work if the TV stops booting or ADB becomes unreachable.** This path has not been field-tested on another model. The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-015) list its gates.
+The experimental trial proceeds only on **Android 11** TVs with the required apps and access. It saves a backup, then asks you to test Home, HDMI, four-color, audio, and picture with the physical remote. Press **`y`** to continue only if all work; **`n`** or Enter starts restore. **Automatic restore cannot work if the TV stops booting or ADB becomes unreachable.** This path has not been field-tested on another model. The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-016) list its gates.
 
 You can share the TV model and Android version in [Issues](https://github.com/pouyaSamie/SamTv-Custom-launchers/issues); do not share backups or personal data.
 
@@ -29,14 +29,14 @@ To install, you need the TV and its remote, a **64-bit Windows or Linux PC with 
 1. **Install Activity Launcher on the TV.** Get it from [F-Droid](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/). Skip this step if it is already installed. [The detailed guide](docs/INSTALL.en.md) explains how to use the TV browser or a USB drive.
 2. **Turn on two settings.** In Activity Launcher, search for `DevelopmentActivity` and open the result named `system.development.developmentActivity`. Turn on **Developer Mode** and **USB Debugging**. Leave the other developer settings alone.
 3. **Write down the TV's IP address.** Find it in the TV's network settings. It may look like `192.168.1.50`; use the address shown on *your* TV.
-4. **Download the computer installer.** Choose [Windows](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/SAM-TV-v0.1.5-windows.zip) or [Linux](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/SAM-TV-v0.1.5-linux.tar.gz), then extract the downloaded file. Do not run the installer from inside the ZIP or TAR.GZ file.
+4. **Download the computer installer.** Choose [Windows](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/SAM-TV-v0.1.6-windows.zip) or [Linux](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/SAM-TV-v0.1.6-linux.tar.gz), then extract the downloaded file. Do not run the installer from inside the ZIP or TAR.GZ file.
 5. **Run it on the computer.** On Windows, double-click `Install-SAM-TV.cmd` in the extracted folder. On Linux, run `Install-SAM-TV` from that folder. If Linux does not offer a Run option, see [the detailed guide](docs/INSTALL.en.md).
-6. **Answer the prompts.** Choose your language and **Install**, then enter the TV's IP address. If the TV asks for permission, select **Allow** with the remote. After the compatibility check, press **Enter** at each of the next four questions for the recommended setup: Choose Home, TV Settings, and Projectivy are included; LTvLauncher is skipped. Read the warning before installation. If you want to proceed, type `INSTALL` and press Enter. Wait for the success message.
+6. **Answer the prompts.** Press **`n`** for English, then **Enter** for normal installation and again to skip the experimental trial. Enter the TV's IP address. If the TV asks for permission, select **Allow** with the remote. After the compatibility check, press **Enter** at each of the four app questions for the recommended setup: Choose Home, TV Settings, and Projectivy are included; LTvLauncher is skipped. Read the warning. Press **`y`** to start installation; Enter cancels it. Wait for the success message.
 7. **Try the remote.** Home should open Projectivy. Use Source/Input to choose an HDMI input and press **OK once**. The four colored dots should open TV Settings. Check these three buttons again after restarting the TV.
 
 Keep the extracted installer folder. Its `backups` folder is needed if you want to restore your previous setup. It contains information from your TV, so keep it private. You do not need to download or transfer APK files yourself.
 
-**For another model:** Choose `4` at the first prompt. Read the warning after discovery and type `EXPERIMENT` only if you accept the risk. Test the remote and HDMI when the trial is ready. Type `PASS` only when everything works. Read the [full trial and recovery guide](docs/INSTALL.en.md) first.
+**For another model:** Press **Enter** to install, then **`y`** when asked about an unverified TV. Read the warning and press **`y`** again only if you accept the risk. Test the remote and HDMI when the trial is ready. Press **`y`** to continue only when everything works; **`n`** or Enter starts restore. Read the [full trial and recovery guide](docs/INSTALL.en.md) first.
 
 ## Change your choices later
 
@@ -50,12 +50,12 @@ Open **Remote Buttons** to make the four-color button open an installed app or t
 
 ## If something goes wrong
 
-If the installer says the TV is incompatible, it has not installed anything. If installation stops after it has made a backup, or a remote button no longer works, open the installer from the **same extracted folder**, choose **Restore previous setup**, and follow the prompts. Restore is started only when you choose it. See the [recovery steps](docs/INSTALL.en.md#if-something-goes-wrong) for details.
+If the installer says the TV is incompatible, it has not installed anything. If normal installation stops after making a backup or a remote button no longer works, reopen the installer from the **same extracted folder**. Press **`n`** for installation, then **`y`** twice for restore. In the experimental trial, rejecting the result starts a restore attempt. See the [recovery steps](docs/INSTALL.en.md#if-something-goes-wrong) for details.
 
 ## Downloads and project details
 
-The [v0.1.5 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.5) contains the computer installers, four TV app APKs, and a checksum file. The installer gets the TV apps from that release and downloads [Projectivy](https://github.com/spocky/miproja1/releases/tag/4.73) or [LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher/releases/tag/v2026.10.27) from their official releases when selected. You only need the **Windows or Linux installer**; the individual APKs are there for reference.
+The [v0.1.6 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.6) contains the computer installers, four TV app APKs, and a checksum file. The installer gets the TV apps from that release and downloads [Projectivy](https://github.com/spocky/miproja1/releases/tag/4.73) or [LTvLauncher](https://github.com/leanbitlab-org/LtvLauncher/releases/tag/v2026.10.27) from their official releases when selected. You only need the **Windows or Linux installer**; the individual APKs are there for reference.
 
-Individual TV files: [Remote Buttons and Home bridge](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/TVHomeBridge-v23.apk), [virtual-key update](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/Tl_VirtualKey-mapped.apk), [Choose Home shortcut](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/ChooseHomeShortcut.apk), and [TV Settings shortcut](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.5/TVSettingsShortcut-v2.apk). The installer handles these automatically.
+Individual TV files: [Remote Buttons and Home bridge](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/TVHomeBridge-v23.apk), [virtual-key update](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/Tl_VirtualKey-mapped.apk), [Choose Home shortcut](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/ChooseHomeShortcut.apk), and [TV Settings shortcut](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/TVSettingsShortcut-v2.apk). The installer handles these automatically.
 
 The original code and documentation in this project use the [MIT License](LICENSE). Other components have their own terms; see [third-party notices](NOTICE.md).
