@@ -10,8 +10,6 @@ This project lets you choose your TV's Home screen and add the features you find
 
 *An example of [Projectivy](https://play.google.com/store/apps/details?id=com.spocky.projengmenu). Your apps and background will look different.*
 
-The TV's original software stays installed. This installer does not reset the TV or erase your apps.
-
 ## Will it work on my TV?
 
 We tested the package on one **SAM R4 running Android 11**. The installer checks the TV's software as well as its model name. Another R4 may still fail the normal installation check.
