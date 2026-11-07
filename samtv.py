@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAM TV Launcher 0.1.6 setup and recovery. Standard library only."""
+"""SAM TV Launcher 0.1.7 setup and recovery. Standard library only."""
 
 from __future__ import annotations
 
@@ -9,15 +9,17 @@ import ipaddress
 import json
 import os
 from pathlib import Path
+import select
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-VERSION = "0.1.6"
+VERSION = "0.1.7"
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 TESTED_REALTEK = "6b2939ee1e30f2c13534692022831f843aa4f587eeee6991e5fbcf6340cad652"
 TESTED_VIRTUALKEY = "3fb39f1da8b17967dddedb7c3828178201e1f474fc7ed097fe3da4111b88e73e"
@@ -60,6 +62,9 @@ BACKUP_PACKAGES = (
 
 class SetupError(Exception):
     pass
+
+
+PENDING_CHOICE_KEYS: list[str] = []
 
 
 def tr(language: str, fa: str, en: str) -> str:
@@ -415,7 +420,7 @@ def install(device: Device, language: str, choose: bool, settings: bool,
                 "Trial is ready. With the physical remote, test Home, HDMI selection with one OK, four-color, audio and picture.")
             if not prompt_yes(language,
                               "آیا همهٔ موارد درست کار کردند و می‌خواهید نصب کامل شود؟",
-                              "Did everything work, and should installation continue?", default=False):
+                              "Did everything work, and should installation continue?"):
                 raise SetupError("The trial was not approved. / آزمون تأیید نشد.")
             device.connect()
             if choose:
@@ -493,30 +498,77 @@ def restore(device: Device, language: str) -> None:
         f"Previous setup restored from {backup}. Restart the TV and test the buttons.")
 
 
-def prompt_yes(language: str, fa: str, en: str, default: bool = True) -> bool:
+def read_choice(prompt: str) -> str:
+    if not sys.stdin.isatty():
+        return input(prompt).strip().lower()
+    if os.name == "nt":
+        import msvcrt
+        print(prompt, end="", flush=True)
+        answer = PENDING_CHOICE_KEYS.pop(0) if PENDING_CHOICE_KEYS else msvcrt.getwch()
+        if answer == "\x03":
+            raise KeyboardInterrupt
+        if answer.lower() in {"y", "n"}:
+            until = time.monotonic() + 0.1
+            while time.monotonic() < until:
+                if msvcrt.kbhit():
+                    trailing = msvcrt.getwch()
+                    if trailing not in {"\r", "\n"}:
+                        PENDING_CHOICE_KEYS.append(trailing)
+                        break
+                else:
+                    time.sleep(0.01)
+    else:
+        import termios
+        import tty
+        descriptor = sys.stdin.fileno()
+        previous = termios.tcgetattr(descriptor)
+        try:
+            tty.setcbreak(descriptor)
+            print(prompt, end="", flush=True)
+            answer = PENDING_CHOICE_KEYS.pop(0) if PENDING_CHOICE_KEYS else os.read(descriptor, 1).decode()
+            if answer.lower() in {"y", "n"}:
+                ready, _, _ = select.select([descriptor], [], [], 0.1)
+                if ready:
+                    trailing = os.read(descriptor, 1).decode()
+                    if trailing not in {"\r", "\n"}:
+                        PENDING_CHOICE_KEYS.append(trailing)
+        finally:
+            termios.tcsetattr(descriptor, termios.TCSADRAIN, previous)
+    if not answer:
+        raise EOFError
+    print("Enter" if answer in {"\r", "\n"} else "Esc" if answer == "\x1b" else answer, flush=True)
+    return answer.lower()
+
+
+def prompt_yes(language: str, fa: str, en: str) -> bool:
     while True:
-        answer = input(tr(language, fa, en) + (" [Y/n] " if default else " [y/N] ")).strip().lower()
-        if not answer:
-            return default
-        if answer in {"y", "n"}:
-            return answer == "y"
-        say(language, "فقط y یا n را بزنید، یا برای گزینهٔ پیش‌فرض Enter بزنید.",
-            "Press y or n, or Enter for the default choice.")
+        prompt = tr(language, fa, en) + tr(language,
+                                          " [Y/Enter: بله، N/Esc: نه] ",
+                                          " [Y/Enter: yes, N/Esc: no] ")
+        answer = read_choice(prompt)
+        if answer in {"", "y", "\r", "\n"}:
+            return True
+        if answer in {"n", "\x1b", "esc"}:
+            return False
+        say(language, "برای تأیید y یا Enter؛ برای رد کردن n یا Esc را بزنید.",
+            "Press y or Enter to accept, or n or Esc to decline.")
 
 
 def setup(language: str) -> None:
     print(f"SAM TV Launcher {VERSION}")
     say(language, "تلویزیون و رایانه باید به یک شبکهٔ خانگی وصل باشند.",
         "Connect the TV and computer to the same home network.")
-    if prompt_yes(language, "می‌خواهید برنامه‌ها را روی تلویزیون نصب کنید؟",
-                  "Do you want to install the TV apps?"):
-        action = "experimental" if prompt_yes(
-            language, "می‌خواهید روی مدل بررسی‌نشده آزمون آزمایشی انجام دهید؟",
-            "Is this an experimental trial on an unverified TV?", default=False) else "install"
+    if prompt_yes(language, "نصب معمولی روی مدل آزمایش‌شده انجام شود؟",
+                  "Run the normal setup for the tested TV model?"):
+        action = "install"
+    elif prompt_yes(language, "می‌خواهید روی مدل بررسی‌نشده آزمون آزمایشی انجام دهید؟",
+                    "Run an experimental trial on an unverified TV?"):
+        action = "experimental"
+    elif prompt_yes(language, "می‌خواهید تنظیم قبلی تلویزیون را بازیابی کنید؟",
+                    "Restore the previous TV setup?"):
+        action = "restore"
     else:
-        action = "restore" if prompt_yes(
-            language, "می‌خواهید تنظیم قبلی تلویزیون را بازیابی کنید؟",
-            "Do you want to restore the previous TV setup?", default=False) else "probe"
+        action = "probe"
     address = input(tr(language, "آدرس IP تلویزیون: ", "TV IP address: ")).strip()
     try:
         ipaddress.ip_address(address)
@@ -525,7 +577,7 @@ def setup(language: str) -> None:
     device = Device(f"{address}:5555")
     if action == "restore":
         if not prompt_yes(language, "بازیابی تنظیم قبلی شروع شود؟",
-                          "Start restoring the previous setup?", default=False):
+                          "Start restoring the previous setup?"):
             say(language, "بازیابی لغو شد.", "Restore cancelled.")
             return
         device.connect()
@@ -537,7 +589,7 @@ def setup(language: str) -> None:
         if action == "probe":
             if not prompt_yes(language,
                               "فقط اگر خواستید بررسی سخت‌گیرانهٔ نصب را هم اجرا کنید. ادامه می‌دهید؟",
-                              "Run the strict installation check too? Continue?", default=False):
+                              "Run the strict installation check too? Continue?"):
                 return
             say(language,
                 "ادامه فقط در صورت تطابق کامل با نسخهٔ آزمایش‌شده ممکن است؛ این بررسی هم چیزی نصب نمی‌کند.",
@@ -547,7 +599,7 @@ def setup(language: str) -> None:
                 "هشدار آزمون: این مسیر روی مدل شما تأیید نشده است. نصب موقت می‌تواند Home یا HDMI را از کار بیندازد. برنامه قبل از تغییر نسخهٔ پشتیبان می‌گیرد و اگر آزمون رد شود، بازیابی را امتحان می‌کند؛ ولی اگر تلویزیون روشن نشود یا ADB قطع شود، بازگشت خودکار ممکن نیست. هیچ پارتیشن فریمور تغییر نمی‌کند.",
                 "Experimental warning: this TV has not been verified. The trial may break Home or HDMI. A backup is saved first and the installer attempts restore if the trial fails, but automatic restore cannot work if the TV stops booting or ADB becomes unreachable. Firmware partitions are not changed.")
             if not prompt_yes(language, "خطر را می‌پذیرید و می‌خواهید آزمون را شروع کنید؟",
-                              "Do you accept the risk and want to start the trial?", default=False):
+                              "Do you accept the risk and want to start the trial?"):
                 say(language, "آزمون لغو شد؛ چیزی نصب نشد.", "Trial cancelled; nothing was installed.")
                 return
     say(language, "در حال اتصال و بررسی سازگاری. اگر پیامی روی تلویزیون آمد، اجازه دهید...",
@@ -566,11 +618,11 @@ def setup(language: str) -> None:
     projectivy = prompt_yes(language, "لانچر Projectivy نصب و پیش‌فرض شود؟ (پیشنهادی)",
                            "Install and select Projectivy Launcher? (recommended)")
     ltv = prompt_yes(language, "لانچر LTvLauncher هم نصب شود؟",
-                     "Also install LTvLauncher?", default=False)
+                     "Also install LTvLauncher?")
     say(language,
         "هشدار: نصب، تنظیم دکمه‌ها و صفحهٔ خانه را تغییر می‌دهد. نسخهٔ پشتیبان پیش از تغییر ذخیره می‌شود، اما بازیابی فقط تا زمانی ممکن است که تلویزیون روشن شود و ADB در دسترس باشد. اگر آزمون دکمه‌ها موفق نبود، از همین پوشه گزینهٔ بازیابی را اجرا کنید.",
         "Warning: installation changes Home and remote-button behavior. A backup is saved first, but restore requires the TV to boot and ADB to remain available. If the button test fails, run Restore from this folder.")
-    if not prompt_yes(language, "نصب شروع شود؟", "Start installation?", default=False):
+    if not prompt_yes(language, "نصب شروع شود؟", "Start installation?"):
         say(language, "نصب لغو شد؛ تغییری انجام نشد.", "Setup cancelled; nothing changed.")
         return
     install(device, language, choose, settings, projectivy, ltv,
@@ -629,7 +681,7 @@ def main() -> int:
                     "این نصب آزمایشی ممکن است Home یا HDMI را مختل کند. بازگشت خودکار فقط با روشن‌بودن تلویزیون و اتصال ADB ممکن است.",
                     "This experimental install may disrupt Home or HDMI. Automatic restore needs a booting TV and working ADB.")
                 if not prompt_yes(language, "خطر را می‌پذیرید و می‌خواهید ادامه دهید؟",
-                                  "Do you accept the risk and want to continue?", default=False):
+                                  "Do you accept the risk and want to continue?"):
                     say(language, "آزمون لغو شد.", "Trial cancelled.")
                     return 0
             install(device, language, not args.skip_choose_home, not args.skip_tv_settings,
@@ -637,7 +689,7 @@ def main() -> int:
                     experimental=args.experimental)
         else:
             if prompt_yes(language, "بازیابی تنظیم قبلی شروع شود؟",
-                          "Start restoring the previous setup?", default=False):
+                          "Start restoring the previous setup?"):
                 restore(device, language)
             else:
                 say(language, "بازیابی لغو شد.", "Restore cancelled.")

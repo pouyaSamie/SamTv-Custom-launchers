@@ -81,7 +81,7 @@ class FakeDevice:
 class RestoreTests(unittest.TestCase):
     def test_wizard_requires_experiment_acknowledgment(self):
         device = FakeDevice()
-        answers = iter(("y", "y", "192.168.1.50", "n"))
+        answers = iter(("n", "y", "192.168.1.50", "n"))
         with patch.object(samtv, "Device", return_value=device), \
              patch.object(samtv, "inspect_device"), \
              patch.object(samtv, "check_compatibility") as check, \
@@ -92,7 +92,7 @@ class RestoreTests(unittest.TestCase):
 
     def test_normal_wizard_needs_only_ip_text(self):
         device = FakeDevice()
-        answers = iter(("", "", "192.168.1.50", "", "", "", "", "n"))
+        answers = iter(("", "192.168.1.50", "", "", "", "", "n"))
         with patch.object(samtv, "Device", return_value=device), \
              patch.object(samtv, "check_compatibility") as check, \
              patch("builtins.input", side_effect=lambda _prompt="": next(answers)):
@@ -102,7 +102,7 @@ class RestoreTests(unittest.TestCase):
 
     def test_restore_wizard_uses_yes_no_only(self):
         device = FakeDevice()
-        answers = iter(("n", "y", "192.168.1.50", "y"))
+        answers = iter(("n", "n", "y", "192.168.1.50", "y"))
         with patch.object(samtv, "Device", return_value=device), \
              patch.object(samtv, "restore") as restore, \
              patch("builtins.input", side_effect=lambda _prompt="": next(answers)):
@@ -112,7 +112,7 @@ class RestoreTests(unittest.TestCase):
 
     def test_read_only_wizard_uses_yes_no_only(self):
         device = FakeDevice()
-        answers = iter(("n", "", "192.168.1.50", ""))
+        answers = iter(("n", "n", "n", "192.168.1.50", "n"))
         with patch.object(samtv, "Device", return_value=device), \
              patch.object(samtv, "inspect_device") as inspect, \
              patch.object(samtv, "check_compatibility") as check, \
@@ -126,6 +126,11 @@ class RestoreTests(unittest.TestCase):
         with patch("builtins.input", side_effect=("maybe", "n")) as ask:
             self.assertFalse(samtv.prompt_yes("en", "ادامه؟", "Continue?"))
         self.assertEqual(ask.call_count, 2)
+
+    def test_enter_accepts_and_escape_declines(self):
+        with patch.object(samtv, "read_choice", side_effect=("", "\x1b")):
+            self.assertTrue(samtv.prompt_yes("en", "ادامه؟", "Continue?"))
+            self.assertFalse(samtv.prompt_yes("en", "ادامه؟", "Continue?"))
 
     def test_experimental_gate_accepts_other_board_with_required_services(self):
         class Candidate:

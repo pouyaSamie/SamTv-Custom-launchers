@@ -1,4 +1,4 @@
-# Maintainer notes and release gate (0.1.6)
+# Maintainer notes and release gate (0.1.7)
 
 Back to [English README](../README.en.md).
 
@@ -14,7 +14,7 @@ The local `dist/` directory contains the four device-specific APKs plus the offi
 
 The bridge requires `START_ACTIVITIES_FROM_BACKGROUND` and `WRITE_SECURE_SETTINGS` to open its Home target and store launcher mappings on this firmware. It also uses `rtk-framework`, which is not part of the public Android SDK. The current APK was signed using a locally held AOSP platform test key matching this TV. That key must never be committed. A different TV firmware may use a different platform certificate, so an APK that works here may fail to install or to obtain required privileges elsewhere. Do not bypass a signature mismatch by removing the OEM TV app.
 
-## Compatibility gate for 0.1.6
+## Compatibility gate for 0.1.7
 
 The current installer has no list of retail SAM model names. Its `check_compatibility` function accepts a device only when **all** of these conditions pass:
 
@@ -30,7 +30,7 @@ For a read-only check, prepare ADB on the candidate TV and run `python3 samtv.py
 
 An unfamiliar model can reach a **read-only discovery result** without being rejected merely because its model or board name differs. Discovery alone is not a working Home/HDMI test.
 
-The installer provides `python3 samtv.py probe --serial TV_IP:5555` and a read-only discovery path in the wizard. It prints model, Android/board/software properties, presence of expected packages and `rtk-framework`, and whether `su 0 id` works. It does not install APKs or change TV settings. The wizard then offers the strict compatibility check. The separate experimental path is behind a warning and a yes/no question whose default is No.
+The installer provides `python3 samtv.py probe --serial TV_IP:5555` and a read-only discovery path in the wizard. It prints model, Android/board/software properties, presence of expected packages and `rtk-framework`, and whether `su 0 id` works. It does not install APKs or change TV settings. The wizard then offers the strict compatibility check. The separate experimental path is behind a warning and an explicit yes/no question. Enter accepts the question; `n` or Esc rejects it.
 
 The experimental path is implemented as these gates:
 
@@ -38,7 +38,7 @@ The experimental path is implemented as these gates:
 2. **Prerequisites:** require Android 11, the Realtek TV/VirtualKey/menu packages, Google Android TV Home, `rtk-framework`, ADB root, the original VirtualKey system APK at the known path, and a declared `HomeKeyReceiver`. The model, board and OEM APK hashes may differ from the R4 profile. A failed prerequisite stops before mutation.
 3. **Prepare recovery:** download and verify APKs, copy the active TV and original VirtualKey APKs, save the current Home selection, receiver state, bridge settings, and versions of affected installed apps. Load and hash-check the just-created backup before changing the TV.
 4. **Trial:** install the bridge, mapped VirtualKey and selected launcher, select bridge Home, and disable the OEM Home receiver. Ask the user to test Home, HDMI with one OK, four-color, audio and picture using the physical remote. This is a functional test, but no other-board result has been observed by the maintainer.
-5. **Continue or restore:** `y` at the trial result question continues to optional shortcut installation. `n` or Enter, an interrupt, or an ADB error attempts `restore()` and verifies the previous Home/receiver/app versions. A rollback failure is reported with the backup path. The pre-existing manual Restore option remains available.
+5. **Continue or restore:** `y` or Enter at the trial result question continues to optional shortcut installation. `n` or Esc, an interrupt, or an ADB error attempts `restore()` and verifies the previous Home/receiver/app versions. A rollback failure is reported with the backup path. The pre-existing manual Restore option remains available.
 
 Automatic rollback is possible only while the TV boots and ADB remains reachable. No installer can promise an unconditional return from a boot failure or loss of ADB. The trial does not write firmware partitions, change verified boot, or remove the TV core. A successful pre-reboot trial does not establish reboot persistence on another model. Do not describe any unfamiliar firmware as verified until physical tests and recovery have been observed on that firmware.
 
@@ -58,7 +58,7 @@ Ask for the model, Android version, chipset properties, the compatibility check 
 
 ## Installer and platform bundles
 
-`samtv.py` is the shared installer for Windows and Linux and uses only Python's standard library. The setup wizard handles installation, read-only discovery, an experimental trial, and user-initiated restore. Apart from the TV IP address, all wizard decisions use `y`, `n`, or Enter; an invalid response is asked again. It checks the model, Android version, chipset string, the active Realtek TV APK hash, the original system VirtualKey APK hash, and required packages before normal installation. It saves APK copies, the pre-install active APK versions, and Home/button settings under an ignored `backups/` directory. Restore selects the newest complete backup matching a hash of this TV's Android ID. Normal installation does not run restore automatically after a partial failure; the experimental trial does.
+`samtv.py` is the shared installer for Windows and Linux and uses only Python's standard library. The setup wizard handles installation, read-only discovery, an experimental trial, and user-initiated restore. Apart from the TV IP address, all wizard decisions accept `y` or Enter and reject with `n` or Esc; an invalid response is asked again. Interactive terminal prompts read a single key so Esc works without an additional Enter. The recommended four app questions now include optional LTvLauncher when accepted with Enter. It checks the model, Android version, chipset string, the active Realtek TV APK hash, the original system VirtualKey APK hash, and required packages before normal installation. It saves APK copies, the pre-install active APK versions, and Home/button settings under an ignored `backups/` directory. Restore selects the newest complete backup matching a hash of this TV's Android ID. Normal installation does not run restore automatically after a partial failure; the experimental trial does.
 
 The Windows package contains the [official Python 3.13.17 embeddable x64 package](https://www.python.org/downloads/release/python-31317/) and Android SDK Platform Tools for Windows. The Python archive SHA-256 was `9e35319bffedab8b36ad44d8f377cb4f1733bcec257a0b6d04d94f01686ddb38`. The Platform Tools Windows archive SHA-256 downloaded for this build was `45f4d63113e895ebde0c90f194099a4676b6ac653bd28d54314a9e022bbc1a99`. `Install-SAM-TV.cmd` launches the bundled `runtime/python.exe`; `tools/adb.exe` and its DLLs provide ADB. The Linux package contains a PyInstaller 6.22.3 x86-64 executable made from the same `samtv.py`, plus the existing Linux ADB binary. Neither computer archive contains APKs. The four device-specific APKs are uploaded as separate release assets; the installer downloads them from the versioned GitHub release. Selected launchers come directly from their official GitHub releases. All six expected SHA-256 values are pinned in `samtv.py`.
 
