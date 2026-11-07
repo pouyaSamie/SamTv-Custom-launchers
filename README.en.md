@@ -2,9 +2,9 @@
 
 [فارسی](README.md) · Version **0.1.6**
 
-This project started with a small frustration on our own TV: pressing Home brought up the Sambazar ribbon. We wanted a different Home screen while keeping the HDMI selector and the TV's own settings working. These are the changes that worked on our set, packaged for other compatible TVs.
+This project started with a frustration on our own TV: pressing Home brought up the Sambazar ribbon. We wanted a different Home screen while keeping HDMI and the TV's settings working. We packaged what worked on our set for other compatible TVs.
 
-With the recommended choices, **Home** opens **Projectivy**, **Source/Input** still chooses an HDMI input, and the remote's **four colored dots** open the TV's Picture and Sound settings. You can change the Home screen or the colored button later.
+With the recommended choices, **Home** opens **Projectivy**, **Source/Input** lets you switch to HDMI, and the remote's **four colored dots** open the TV's Picture and Sound settings. You can change the Home screen or the colored button later.
 
 <img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="480" alt="Example of the Projectivy Home screen">
 
@@ -14,11 +14,11 @@ The TV's original software stays installed so HDMI and other TV functions can wo
 
 ## Will it work on my TV?
 
-The TV-side package was tested on one **SAM R4 running Android 11**. The installer checks more than the model name: it compares required TV software with the tested set. Another TV may also say R4 and still fail the normal check. The new experimental path in **0.1.6** has not been field-tested on another model.
+We tested the package on one **SAM R4 running Android 11**. The installer checks the TV's software as well as its model name. Another R4 may still fail the normal installation check.
 
-If your device does not report R4 or has a different board family, you can choose **Read-only discovery**. It shows basic TV properties without installing anything or testing Home and HDMI. A separate **Experimental trial** option lets you try the setup after a warning. A rejected normal check does not prove the approach is impossible on your TV.
+If you have another model or board, start with **Read-only discovery**. It shows the TV's basic details without installing anything. To try Home and HDMI, choose **Experimental trial**. Failing the normal check does not mean this approach cannot work on your TV.
 
-The experimental trial proceeds only on **Android 11** TVs with the required apps and access. It saves a backup, then asks you to test Home, HDMI, four-color, audio, and picture with the physical remote. Press **`y`** to continue only if all work; **`n`** or Enter starts restore. **Automatic restore cannot work if the TV stops booting or ADB becomes unreachable.** This path has not been field-tested on another model. The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-016) list its gates.
+The experimental trial in **0.1.6** has not been field-tested on another model. It proceeds only on **Android 11** TVs with the required apps and access. The installer saves a backup, then asks you to test Home, HDMI, four-color, audio, and picture with the physical remote. Press **`y`** to continue if everything works; **`n`** or Enter starts restore. **Automatic restore requires the TV to boot and ADB to remain available.** The [technical notes](docs/MAINTAINERS.md#compatibility-gate-for-016) list the exact requirements.
 
 You can share the TV model and Android version in [Issues](https://github.com/pouyaSamie/SamTv-Custom-launchers/issues); do not share backups or personal data.
 
@@ -31,12 +31,12 @@ To install, you need the TV and its remote, a **64-bit Windows or Linux PC with 
 3. **Write down the TV's IP address.** Find it in the TV's network settings. It may look like `192.168.1.50`; use the address shown on *your* TV.
 4. **Download the computer installer.** Choose [Windows](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/SAM-TV-v0.1.6-windows.zip) or [Linux](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.6/SAM-TV-v0.1.6-linux.tar.gz), then extract the downloaded file. Do not run the installer from inside the ZIP or TAR.GZ file.
 5. **Run it on the computer.** On Windows, double-click `Install-SAM-TV.cmd` in the extracted folder. On Linux, run `Install-SAM-TV` from that folder. If Linux does not offer a Run option, see [the detailed guide](docs/INSTALL.en.md).
-6. **Answer the prompts.** Press **`n`** for English, then **Enter** for normal installation and again to skip the experimental trial. Enter the TV's IP address. If the TV asks for permission, select **Allow** with the remote. After the compatibility check, press **Enter** at each of the four app questions for the recommended setup: Choose Home, TV Settings, and Projectivy are included; LTvLauncher is skipped. Read the warning. Press **`y`** to start installation; Enter cancels it. Wait for the success message.
+6. **Answer the prompts.** Press **`n`** for English, then **Enter** for normal installation and again to skip the experimental trial. Enter the TV's IP address. If the TV asks for permission, select **Allow** with the remote. After the compatibility check, press **Enter** at each of the four app questions. This installs Choose Home, TV Settings, and Projectivy, and skips LTvLauncher. Read the warning and press **`y`** to start installation. Enter at this question cancels it.
 7. **Try the remote.** Home should open Projectivy. Use Source/Input to choose an HDMI input and press **OK once**. The four colored dots should open TV Settings. Check these three buttons again after restarting the TV.
 
 Keep the extracted installer folder. Its `backups` folder is needed if you want to restore your previous setup. It contains information from your TV, so keep it private. You do not need to download or transfer APK files yourself.
 
-**For another model:** Press **Enter** to install, then **`y`** when asked about an unverified TV. Read the warning and press **`y`** again only if you accept the risk. Test the remote and HDMI when the trial is ready. Press **`y`** to continue only when everything works; **`n`** or Enter starts restore. Read the [full trial and recovery guide](docs/INSTALL.en.md) first.
+**If you have another model:** Press **Enter** when asked about installation, then **`y`** when asked about an unverified TV. Read the warning and press **`y`** again only if you accept the risk. When the trial is ready, test the remote and HDMI. If everything works, **`y`** continues installation; **`n`** or Enter starts restore. Read the [trial and recovery guide](docs/INSTALL.en.md) first.
 
 ## Change your choices later
 
