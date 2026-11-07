@@ -2,7 +2,7 @@
 
 [فارسی](README.md) · Version **0.1.6**
 
-This project started with a frustration on our own TV: pressing Home brought up the Sambazar ribbon. We wanted a different Home screen while keeping HDMI and the TV's settings working. We packaged what worked on our set for other compatible TVs.
+One frustration with SAM TVs is how little you can change the Home screen and app ribbon. Even with capable hardware, that makes everyday use more cumbersome. This project lets you choose another Home screen and set the four-color button while keeping the TV's HDMI inputs and settings working.
 
 With the recommended choices, **Home** opens **Projectivy**, **Source/Input** lets you switch to HDMI, and the remote's **four colored dots** open the TV's Picture and Sound settings. You can change the Home screen or the colored button later.
 
