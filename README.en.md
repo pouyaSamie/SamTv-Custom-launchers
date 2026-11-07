@@ -1,6 +1,6 @@
 # Change the Home screen and remote buttons on SAM TV
 
-[فارسی](README.md) · Version **0.1.7**
+[فارسی](README.md) · Version **0.1.8**
 
 One frustration with SAM TVs is how little you can change the Home screen and app ribbon. Even with capable hardware, that makes everyday use more cumbersome.
 
@@ -25,9 +25,9 @@ To install, you need the TV remote and a **64-bit Windows or Linux computer with
 1. **Install Activity Launcher on the TV.** Get it from [F-Droid](https://f-droid.org/en/packages/de.szalkowski.activitylauncher/). Skip this step if it is already installed. [The detailed guide](docs/INSTALL.en.md) explains how to use the TV browser or a USB drive.
 2. **Turn on two settings.** In Activity Launcher, search for `DevelopmentActivity` and open the result named `system.development.developmentActivity`. Turn on **Developer Mode** and **USB Debugging**. Leave the other developer settings alone.
 3. **Write down the TV's IP address.** Find it in the TV's network settings. It may look like `192.168.1.50`; use the address shown on *your* TV.
-4. **Download the computer installer.** Choose [Windows](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.7/SAM-TV-v0.1.7-windows.zip) or [Linux](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.7/SAM-TV-v0.1.7-linux.tar.gz), then extract the downloaded file. Do not run the installer from inside the ZIP or TAR.GZ file.
+4. **Download the computer installer.** Choose [Windows](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.8/SAM-TV-v0.1.8-windows.zip) or [Linux](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.8/SAM-TV-v0.1.8-linux.tar.gz), then extract the downloaded file. Do not run the installer from inside the ZIP or TAR.GZ file.
 5. **Run it on the computer.** On Windows, double-click `Install-SAM-TV.cmd` in the extracted folder. On Linux, run `Install-SAM-TV` from that folder. If Linux does not offer a Run option, see [the detailed guide](docs/INSTALL.en.md).
-6. **Answer the prompts.** Press **`n`** for English, then **Enter** for normal installation. Enter the TV's IP address. If the TV asks for permission, select **Allow** with the remote.
+6. **Answer the prompts.** The installer is in English. Press **Enter** at the normal-setup question. Enter the TV's IP address. If the TV asks for permission, select **Allow** with the remote.
 7. **Choose what to install.** After the TV check, press **Enter** at each of the four questions for the recommended setup. This installs Projectivy, Choose Home, TV Settings, and LTvLauncher; Projectivy becomes Home. To skip LTvLauncher, press **`n`** or **Esc** at its question.
 8. **Start and check the installation.** Read the warning, then press **`y`** or **Enter** to install; **`n`** or **Esc** cancels. Once you see the success message, Home should open Projectivy. Follow the [post-installation checks](docs/INSTALL.en.md).
 
@@ -51,6 +51,6 @@ If the installer says the TV is incompatible, it has not started installation. I
 
 ## Download and project details
 
-From the [v0.1.7 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.7), download only the installer for your computer. It downloads the TV files for you.
+From the [v0.1.8 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.8), download only the installer for your computer. It downloads the TV files for you.
 
 The original code and documentation in this project use the [MIT License](LICENSE). Other components have their own terms; see [third-party notices](NOTICE.md).

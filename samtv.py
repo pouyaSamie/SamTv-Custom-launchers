@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAM TV Launcher 0.1.7 setup and recovery. Standard library only."""
+"""SAM TV Launcher 0.1.8 setup and recovery. Standard library only."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-VERSION = "0.1.7"
+VERSION = "0.1.8"
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 TESTED_REALTEK = "6b2939ee1e30f2c13534692022831f843aa4f587eeee6991e5fbcf6340cad652"
 TESTED_VIRTUALKEY = "3fb39f1da8b17967dddedb7c3828178201e1f474fc7ed097fe3da4111b88e73e"
@@ -85,7 +85,7 @@ def adb_executable() -> str:
     found = shutil.which("adb")
     if found:
         return found
-    raise SetupError("ADB is missing. / ابزار ADB در بسته پیدا نشد.")
+    raise SetupError("ADB is missing from the installer package.")
 
 
 class Device:
@@ -102,11 +102,11 @@ class Device:
         if result.returncode != 0:
             detail = (result.stderr or result.stdout).strip()
             if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in detail:
-                raise SetupError("The TV rejected an app signature. Nothing else should be changed; use Restore if setup had already started. / امضای برنامه با تلویزیون سازگار نیست؛ اگر نصب شروع شده بود، گزینهٔ بازیابی را اجرا کنید.")
+                raise SetupError("The TV rejected an app signature. If setup had already started, use Restore.")
             if "INSTALL_FAILED_INSUFFICIENT_STORAGE" in detail or "No space left" in detail:
-                raise SetupError("The TV has too little free space. / فضای خالی تلویزیون کافی نیست.")
+                raise SetupError("The TV has too little free space.")
             if "device offline" in detail or "device not found" in detail or "unable to connect" in detail:
-                raise SetupError("Connection to the TV was lost. Check the network and ADB permission. / اتصال تلویزیون قطع شد؛ شبکه و اجازهٔ ADB را بررسی کنید.")
+                raise SetupError("Connection to the TV was lost. Check the network and ADB permission.")
             raise SetupError(f"ADB failed: {' '.join(args)}\n{detail}")
         return result.stdout.strip()
 
@@ -120,9 +120,9 @@ class Device:
         try:
             state = self.run("get-state", timeout=20)
         except SetupError as exc:
-            raise SetupError("TV connection failed. Check the IP, network, and ADB permission on the TV. / اتصال برقرار نشد؛ IP، شبکه و اجازهٔ ADB را بررسی کنید.") from exc
+            raise SetupError("TV connection failed. Check the IP, network, and ADB permission on the TV.") from exc
         if state != "device":
-            raise SetupError("TV is unavailable or ADB permission was not accepted. / اتصال تلویزیون یا اجازهٔ ADB برقرار نیست.")
+            raise SetupError("TV is unavailable or ADB permission was not accepted.")
 
     def shell(self, *args: str) -> str:
         return self.run("shell", *args)
@@ -161,9 +161,9 @@ def check_compatibility(device: Device, working: Path,
     board = device.shell("getprop", "ro.product.board")
     print(f"TV: {model}, Android {android}, {hardware} / {board}")
     if android != "11":
-        raise SetupError("This installer requires Android 11. Nothing was installed. / این نصب‌کننده به اندروید ۱۱ نیاز دارد؛ چیزی نصب نشد.")
+        raise SetupError("This installer requires Android 11. Nothing was installed.")
     if not experimental and (model != "R4" or "2851" not in (hardware + board).lower()):
-        raise SetupError("This TV version has not been verified. Nothing was installed. / این مدل هنوز بررسی نشده و چیزی نصب نشد.")
+        raise SetupError("This TV version has not been verified. Nothing was installed.")
     realtek = working / "RtkLiveTv.apk"
     virtualkey = working / "Tl_VirtualKey.apk"
     device.pull_package("com.realtek.tv", realtek)
@@ -174,7 +174,7 @@ def check_compatibility(device: Device, working: Path,
     device.run("pull", ORIGINAL_VIRTUALKEY_PATH, str(virtualkey), timeout=180)
     if not experimental and (sha256(realtek) != TESTED_REALTEK or
                              sha256(virtualkey) != TESTED_VIRTUALKEY):
-        raise SetupError("The TV software differs from the tested version. Nothing was installed. / نرم‌افزار تلویزیون با نسخهٔ آزمایش‌شده فرق دارد؛ چیزی نصب نشد.")
+        raise SetupError("The TV software differs from the tested version. Nothing was installed.")
     for package in ("com.realtek.menu", "com.google.android.tvlauncher"):
         if not device.shell("pm", "path", package).startswith("package:"):
             raise SetupError(f"Required TV app is missing: {package}")
@@ -184,7 +184,7 @@ def check_compatibility(device: Device, working: Path,
         raise SetupError("This TV does not provide the root access needed for the Home receiver. Nothing was installed.")
     if experimental and "com.realtek.tv.receiver.HomeKeyReceiver" not in device.shell(
             "dumpsys", "package", "com.realtek.tv"):
-        raise SetupError("The required Home receiver is missing. Nothing was installed. / گیرندهٔ لازم برای دکمهٔ خانه پیدا نشد؛ چیزی نصب نشد.")
+        raise SetupError("The required Home receiver is missing. Nothing was installed.")
     return realtek, virtualkey
 
 
@@ -235,9 +235,9 @@ def verify_bundle(apk_dir: Path, keys: list[str]) -> None:
     for key in keys:
         path = apk_dir / APKS[key]
         if not path.is_file():
-            raise SetupError(f"Missing installation file: {path.name} / فایل نصب پیدا نشد.")
+            raise SetupError(f"Missing installation file: {path.name}")
         if sha256(path) != APK_SHA256[key]:
-            raise SetupError(f"Checksum failed: {path.name} / اعتبار فایل نصب تأیید نشد.")
+            raise SetupError(f"Checksum failed: {path.name}")
 
 
 def download_apks(apk_dir: Path, keys: list[str]) -> None:
@@ -263,10 +263,10 @@ def download_apks(apk_dir: Path, keys: list[str]) -> None:
                     output.write(chunk)
                     digest.update(chunk)
             if digest.hexdigest() != APK_SHA256[key]:
-                raise SetupError(f"Checksum failed: {target.name} / اعتبار فایل دانلودشده تأیید نشد.")
+                raise SetupError(f"Checksum failed: {target.name}")
             temporary.replace(target)
         except (OSError, urllib.error.URLError) as exc:
-            raise SetupError(f"Could not download {target.name} from {url}: {exc} / دانلود انجام نشد؛ اتصال اینترنت رایانه را بررسی کنید.") from exc
+            raise SetupError(f"Could not download {target.name} from {url}: {exc}. Check the computer's internet connection.") from exc
         finally:
             temporary.unlink(missing_ok=True)
     verify_bundle(apk_dir, keys)
@@ -386,7 +386,7 @@ def install(device: Device, language: str, choose: bool, settings: bool,
         if experimental:
             verified_backup, _ = load_restore_point(device)
             if verified_backup != backup:
-                raise SetupError("The recovery backup could not be verified. Nothing was installed. / نسخهٔ پشتیبان تأیید نشد؛ چیزی نصب نشد.")
+                raise SetupError("The recovery backup could not be verified. Nothing was installed.")
     say(language, f"نسخهٔ پشتیبان در {backup} ذخیره شد.", f"Recovery backup saved at {backup}.")
     try:
         device.run("install", "-r", str(apk_dir / APKS["bridge"]), timeout=180)
@@ -421,7 +421,7 @@ def install(device: Device, language: str, choose: bool, settings: bool,
             if not prompt_yes(language,
                               "آیا همهٔ موارد درست کار کردند و می‌خواهید نصب کامل شود؟",
                               "Did everything work, and should installation continue?"):
-                raise SetupError("The trial was not approved. / آزمون تأیید نشد.")
+                raise SetupError("The trial was not approved.")
             device.connect()
             if choose:
                 device.run("install", "-r", str(apk_dir / APKS["choose"]), timeout=180)
@@ -573,7 +573,7 @@ def setup(language: str) -> None:
     try:
         ipaddress.ip_address(address)
     except ValueError as exc:
-        raise SetupError("Enter a valid TV IP address. / آدرس IP معتبر وارد کنید.") from exc
+        raise SetupError("Enter a valid TV IP address.") from exc
     device = Device(f"{address}:5555")
     if action == "restore":
         if not prompt_yes(language, "بازیابی تنظیم قبلی شروع شود؟",
@@ -646,7 +646,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=f"SAM TV Launcher {VERSION}")
     parser.add_argument("command", nargs="?", choices=("setup", "probe", "check", "install", "restore"), default="setup")
     parser.add_argument("--serial", help="TV_IP:5555; required for probe/check/install/restore")
-    parser.add_argument("--language", choices=("fa", "en"))
     parser.add_argument("--skip-choose-home", action="store_true")
     parser.add_argument("--skip-tv-settings", action="store_true")
     parser.add_argument("--skip-projectivy", action="store_true")
@@ -657,12 +656,9 @@ def main() -> int:
     args = parser.parse_args()
     if args.experimental and args.command != "install":
         parser.error("--experimental is available only with the install command")
-    language = args.language or ("fa" if args.command == "setup" else "en")
+    language = "en"
     try:
         if args.command == "setup":
-            if args.language is None:
-                language = "fa" if prompt_yes("fa", "زبان فارسی؟ / Persian language?",
-                                               "Use Persian?") else "en"
             setup(language)
             return 0
         if not args.serial:
@@ -696,7 +692,7 @@ def main() -> int:
         return 0
     except (SetupError, EOFError, KeyboardInterrupt) as exc:
         say(language, "نصب کامل نشد. دلیل:", "Setup did not finish. Reason:")
-        print(str(exc) or "Cancelled / لغو شد", file=sys.stderr)
+        print(str(exc) or "Cancelled", file=sys.stderr)
         return 1
 
 
@@ -704,7 +700,7 @@ if __name__ == "__main__":
     result = main()
     if os.environ.get("SAMTV_FROM_GUI"):
         try:
-            input("\nEnter / ورود برای بستن پنجره: ")
+            input("\nPress Enter to close this window: ")
         except EOFError:
             pass
     raise SystemExit(result)

@@ -79,6 +79,11 @@ class FakeDevice:
 
 
 class RestoreTests(unittest.TestCase):
+    def test_setup_starts_in_english_without_language_prompt(self):
+        with patch.object(samtv, "setup") as setup, patch("sys.argv", ["samtv.py"]):
+            self.assertEqual(samtv.main(), 0)
+        setup.assert_called_once_with("en")
+
     def test_wizard_requires_experiment_acknowledgment(self):
         device = FakeDevice()
         answers = iter(("n", "y", "192.168.1.50", "n"))

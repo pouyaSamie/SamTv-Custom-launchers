@@ -1,4 +1,4 @@
-# Maintainer notes and release gate (0.1.7)
+# Maintainer notes and release gate (0.1.8)
 
 Back to [English README](../README.en.md).
 
@@ -14,7 +14,7 @@ The local `dist/` directory contains the four device-specific APKs plus the offi
 
 The bridge requires `START_ACTIVITIES_FROM_BACKGROUND` and `WRITE_SECURE_SETTINGS` to open its Home target and store launcher mappings on this firmware. It also uses `rtk-framework`, which is not part of the public Android SDK. The current APK was signed using a locally held AOSP platform test key matching this TV. That key must never be committed. A different TV firmware may use a different platform certificate, so an APK that works here may fail to install or to obtain required privileges elsewhere. Do not bypass a signature mismatch by removing the OEM TV app.
 
-## Compatibility gate for 0.1.7
+## Compatibility gate for 0.1.8
 
 The current installer has no list of retail SAM model names. Its `check_compatibility` function accepts a device only when **all** of these conditions pass:
 
@@ -58,7 +58,7 @@ Ask for the model, Android version, chipset properties, the compatibility check 
 
 ## Installer and platform bundles
 
-`samtv.py` is the shared installer for Windows and Linux and uses only Python's standard library. The setup wizard handles installation, read-only discovery, an experimental trial, and user-initiated restore. Apart from the TV IP address, all wizard decisions accept `y` or Enter and reject with `n` or Esc; an invalid response is asked again. Interactive terminal prompts read a single key so Esc works without an additional Enter. The recommended four app questions now include optional LTvLauncher when accepted with Enter. It checks the model, Android version, chipset string, the active Realtek TV APK hash, the original system VirtualKey APK hash, and required packages before normal installation. It saves APK copies, the pre-install active APK versions, and Home/button settings under an ignored `backups/` directory. Restore selects the newest complete backup matching a hash of this TV's Android ID. Normal installation does not run restore automatically after a partial failure; the experimental trial does.
+`samtv.py` is the shared installer for Windows and Linux and uses only Python's standard library. The setup wizard handles installation, read-only discovery, an experimental trial, and user-initiated restore. Its terminal UI is English on both platforms; Persian remains available in the README and installation guide. We did not verify bidirectional Persian rendering in Windows Command Prompt, so the released console does not offer Persian. Apart from the TV IP address, all wizard decisions accept `y` or Enter and reject with `n` or Esc; an invalid response is asked again. Interactive terminal prompts read a single key so Esc works without an additional Enter. The recommended four app questions include optional LTvLauncher when accepted with Enter. It checks the model, Android version, chipset string, the active Realtek TV APK hash, the original system VirtualKey APK hash, and required packages before normal installation. It saves APK copies, the pre-install active APK versions, and Home/button settings under an ignored `backups/` directory. Restore selects the newest complete backup matching a hash of this TV's Android ID. Normal installation does not run restore automatically after a partial failure; the experimental trial does.
 
 The Windows package contains the [official Python 3.13.17 embeddable x64 package](https://www.python.org/downloads/release/python-31317/) and Android SDK Platform Tools for Windows. The Python archive SHA-256 was `9e35319bffedab8b36ad44d8f377cb4f1733bcec257a0b6d04d94f01686ddb38`. The Platform Tools Windows archive SHA-256 downloaded for this build was `45f4d63113e895ebde0c90f194099a4676b6ac653bd28d54314a9e022bbc1a99`. `Install-SAM-TV.cmd` launches the bundled `runtime/python.exe`; `tools/adb.exe` and its DLLs provide ADB. The Linux package contains a PyInstaller 6.22.3 x86-64 executable made from the same `samtv.py`, plus the existing Linux ADB binary. Neither computer archive contains APKs. The four device-specific APKs are uploaded as separate release assets; the installer downloads them from the versioned GitHub release. Selected launchers come directly from their official GitHub releases. All six expected SHA-256 values are pinned in `samtv.py`.
 
