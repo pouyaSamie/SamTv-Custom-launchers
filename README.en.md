@@ -2,15 +2,15 @@
 
 [فارسی](README.md) · Version **0.1.6**
 
-One frustration with SAM TVs is how little you can change the Home screen and app ribbon. Even with capable hardware, that makes everyday use more cumbersome. This project lets you choose another Home screen and set the four-color button while keeping the TV's HDMI inputs and settings working.
+One frustration with SAM TVs is how little you can change the Home screen and app ribbon. Even with capable hardware, that makes everyday use more cumbersome.
 
-With the recommended choices, **Home** opens **Projectivy**, **Source/Input** lets you switch to HDMI, and the remote's **four colored dots** open the TV's Picture and Sound settings. You can change the Home screen or the colored button later.
+This project puts the Home screen choice in your hands. You can choose which launcher opens with the Home button, add a shortcut to TV settings, and change what the four-color button does. HDMI switching and the TV's settings remain available.
 
 <img src="https://play-lh.googleusercontent.com/U1hhfK4bw9Q9C-qbj1AfReA-lpDqrovDLZxfl99V1UdBnCcijmNCXEcj9MFDkC00eTF6mt2-b072VYjbUsGJwA=w1052-h592" width="480" alt="Example of the Projectivy Home screen">
 
 *An example of [Projectivy](https://play.google.com/store/apps/details?id=com.spocky.projengmenu). Your apps and background will look different.*
 
-The TV's original software stays installed so HDMI and other TV functions can work. This installer does not reset the TV or erase your personal apps.
+The TV's original software stays installed. This installer does not reset the TV or erase your apps.
 
 ## Will it work on my TV?
 
