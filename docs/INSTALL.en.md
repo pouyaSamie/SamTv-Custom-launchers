@@ -4,7 +4,7 @@
 
 Follow this guide on the TV and a computer. With the recommended choices, **Home** opens Projectivy, **Source/Input** still switches HDMI, and the remote's **four colored dots** open the TV settings menu.
 
-Version **0.1.9** supports **Android 11 and newer** and is prepared for the tested **SAM R4 running Android 11** and its matching TV software. The name R4 alone is not enough; the installer checks required software too. On a different model, board, or Android version, you can run **Read-only discovery** first and then choose **Experimental trial** if you accept the risk. This path has not been field-tested on another model. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-019) are in the technical notes.
+Version **0.1.9** accepts **Android 11 and newer**, including the current Android TV OS 16, in its Android-version check. It has been tested only on the **SAM R4 running Android 11** with matching TV software. The name R4 alone is not enough; the installer checks required software too. On a different model, board, or Android version, you can run **Read-only discovery** first and then choose **Experimental trial** if you accept the risk. This path has not been field-tested on another model or Android version. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-019) are in the technical notes.
 
 ## 1. Prepare the TV
 

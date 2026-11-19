@@ -12,7 +12,7 @@ This project lets you choose your TV's Home screen and add the features you find
 
 ## Will it work on my TV?
 
-This version was tested on **one SAM R4 running Android 11** and supports **Android 11 and newer** (including 12 and 13). The installer checks your TV before installation, and it may reject another R4 for the normal setup.
+This version was tested on **one SAM R4 running Android 11**. Its version check accepts **Android 11 and newer**, including the current Android TV OS 16. Newer Android versions on other TVs have not been field-tested; the installer checks your TV before installation, and the normal setup may reject a different firmware.
 
 If you have a different model, you can start with **Read-only discovery**, which installs nothing. The installer also offers an **Experimental trial** to try the setup on another model.
 
