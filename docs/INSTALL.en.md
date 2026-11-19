@@ -4,7 +4,7 @@
 
 Follow this guide on the TV and a computer. With the recommended choices, **Home** opens Projectivy, **Source/Input** still switches HDMI, and the remote's **four colored dots** open the TV settings menu.
 
-Version **0.1.8** is prepared for the tested **SAM R4 running Android 11** and its matching TV software. The name R4 alone is not enough; the installer checks required software too. On a different model or board, you can run **Read-only discovery** first and then choose **Experimental trial** if you accept the risk. This path has not been field-tested on another model. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-017) are in the technical notes.
+Version **0.1.9** supports **Android 11 and newer** and is prepared for the tested **SAM R4 running Android 11** and its matching TV software. The name R4 alone is not enough; the installer checks required software too. On a different model, board, or Android version, you can run **Read-only discovery** first and then choose **Experimental trial** if you accept the risk. This path has not been field-tested on another model. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-019) are in the technical notes.
 
 ## 1. Prepare the TV
 
@@ -28,7 +28,7 @@ In the TV's settings, open **Network**, **Wi-Fi**, or **Ethernet**, depending on
 
 ## 2. Run the installer on your computer
 
-1. Download **one** file for your computer from the [v0.1.8 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.8): [Windows ZIP](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.8/SAM-TV-v0.1.8-windows.zip) or [Linux TAR.GZ](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.8/SAM-TV-v0.1.8-linux.tar.gz). You do not need the individual APK files.
+1. Download **one** file for your computer from the [v0.1.9 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.9): [Windows ZIP](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.9/SAM-TV-v0.1.9-windows.zip) or [Linux TAR.GZ](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.9/SAM-TV-v0.1.9-linux.tar.gz). You do not need the individual APK files.
 2. **Extract** the downloaded file. Do not run the installer while it is still inside the archive.
 3. On **Windows**, open the extracted folder and double-click `Install-SAM-TV.cmd`. On **Linux**, open the extracted folder and run `Install-SAM-TV`. If your Linux file manager does not offer **Run**, open a terminal in that folder and enter `./Install-SAM-TV`.
 4. The installer is in English. Press **Enter** at the normal-setup question, then enter the TV's IP address. For read-only discovery, press **`n`** or **Esc** at each of the three questions: normal setup, experimental trial, and restore.
@@ -42,7 +42,7 @@ If you chose **Read-only discovery**, the installer shows the TV information and
 
 ### Trial on another model
 
-This section applies to **Experimental trial**. The model, board, and original APK hashes may differ from the tested R4, but **Android 11, the required Realtek apps, and ADB root** must be present. Without them, the installer stops before changing the TV.
+This section applies to **Experimental trial**. The model, board, and original APK hashes may differ from the tested R4, but **Android 11 or newer, the required Realtek apps, and ADB root** must be present. Without them, the installer stops before changing the TV.
 
 1. Press **`n`** or **Esc** at the normal-setup question, then **`y`** or **Enter** at the experimental-trial question. Enter the IP address. Read the displayed TV information and warning. Press **`y`** or **Enter** to start the trial; **`n`** or **Esc** exits without installing anything.
 2. The installer downloads and verifies its files, then saves and checks a **recovery backup before any change**. It activates the core pieces for a trial.

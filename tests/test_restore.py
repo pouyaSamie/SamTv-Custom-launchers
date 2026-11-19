@@ -143,6 +143,7 @@ class RestoreTests(unittest.TestCase):
                 values = {
                     ("getprop", "ro.product.model"): "SAM-X",
                     ("getprop", "ro.build.version.release"): "11",
+                    ("getprop", "ro.build.version.sdk"): "30",
                     ("getprop", "ro.hardware"): "another-chip",
                     ("getprop", "ro.product.board"): "another-board",
                     ("pm", "list", "libraries"): "library:rtk-framework",
@@ -169,6 +170,58 @@ class RestoreTests(unittest.TestCase):
                 candidate, Path(folder), experimental=True)
             self.assertTrue(realtek.is_file())
             self.assertTrue(virtualkey.is_file())
+
+    def test_compatibility_accepts_android_11_and_newer(self):
+        class Candidate:
+            def __init__(self, release, sdk):
+                self.release = release
+                self.sdk = sdk
+
+            def shell(self, *args):
+                values = {
+                    ("getprop", "ro.product.model"): "SAM-X",
+                    ("getprop", "ro.build.version.release"): self.release,
+                    ("getprop", "ro.build.version.sdk"): self.sdk,
+                    ("getprop", "ro.hardware"): "another-chip",
+                    ("getprop", "ro.product.board"): "another-board",
+                    ("pm", "list", "libraries"): "library:rtk-framework",
+                    ("su", "0", "id"): "uid=0(root)",
+                }
+                if args[:2] == ("pm", "path"):
+                    return "package:/system_ext/app/Tl_VirtualKey/Tl_VirtualKey.apk"
+                if args[:2] == ("dumpsys", "package"):
+                    return "com.realtek.tv.receiver.HomeKeyReceiver"
+                return values[args]
+
+            def pull_package(self, _package, target):
+                target.write_bytes(b"different TV APK")
+
+            def run(self, *args, **_kwargs):
+                if args[0] == "pull":
+                    Path(args[2]).write_bytes(b"different virtual key")
+
+        with tempfile.TemporaryDirectory() as folder:
+            # Android 11 and every newer release, plus a non-numeric
+            # release string on an SDK-33 firmware, pass the version gate.
+            for release, sdk in (("11", "30"), ("12", "31"), ("12", "32"),
+                                 ("13", "33"), ("14", "34"), ("15", "35"),
+                                 ("16", "36"), ("T", "33")):
+                candidate = Candidate(release, sdk)
+                with self.assertRaisesRegex(samtv.SetupError, "not been verified"):
+                    samtv.check_compatibility(candidate, Path(folder))
+                realtek, virtualkey = samtv.check_compatibility(
+                    candidate, Path(folder), experimental=True)
+                self.assertTrue(realtek.is_file())
+                self.assertTrue(virtualkey.is_file())
+            # Android 10 and older, and unreadable versions, are rejected
+            # before anything is pulled or changed.
+            for release, sdk in (("10", "29"), ("9", "28"), ("", "")):
+                candidate = Candidate(release, sdk)
+                for experimental in (False, True):
+                    with self.assertRaisesRegex(
+                            samtv.SetupError, "Android 11 or newer"):
+                        samtv.check_compatibility(candidate, Path(folder),
+                                                  experimental=experimental)
 
     def test_experimental_trial_restores_when_user_rejects_it(self):
         device = FakeDevice()

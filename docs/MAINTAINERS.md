@@ -1,10 +1,10 @@
-# Maintainer notes and release gate (0.1.8)
+# Maintainer notes and release gate (0.1.9)
 
 Back to [English README](../README.en.md).
 
 ## Current architecture
 
-The bridge is an Android 11 app using the TV's `rtk-framework` `KeyEventManager` to intercept Home (3), Source (137), and four-color (138). The OEM `com.realtek.tv` remains responsible for HDMI. A data-installed update to `com.example.tl_virtualkey` suppresses the conflicting source/number strip. The `Choose Home` and `TV Settings` APKs are thin shortcut apps; the actual launcher selector and Remote Buttons screen are in `org.pouya.tvhomebridge`.
+The bridge is an app built against the Android 11 framework and uses the TV's `rtk-framework` `KeyEventManager` to intercept Home (3), Source (137), and four-color (138). The OEM `com.realtek.tv` remains responsible for HDMI. A data-installed update to `com.example.tl_virtualkey` suppresses the conflicting source/number strip. The `Choose Home` and `TV Settings` APKs are thin shortcut apps; the actual launcher selector and Remote Buttons screen are in `org.pouya.tvhomebridge`.
 
 The `src/smali/` directory contains only the custom bridge and shortcut classes extracted from the working prototype. It cannot produce an APK by itself. The prototype APK and both shortcut APKs were assembled using an existing app template with many unused resources; the virtual-key APK is a modified OEM package. The maintainer has confirmed redistribution approval. Do **not** present these as reproducible open-source builds.
 
@@ -14,19 +14,21 @@ The local `dist/` directory contains the four device-specific APKs plus the offi
 
 The bridge requires `START_ACTIVITIES_FROM_BACKGROUND` and `WRITE_SECURE_SETTINGS` to open its Home target and store launcher mappings on this firmware. It also uses `rtk-framework`, which is not part of the public Android SDK. The current APK was signed using a locally held AOSP platform test key matching this TV. That key must never be committed. A different TV firmware may use a different platform certificate, so an APK that works here may fail to install or to obtain required privileges elsewhere. Do not bypass a signature mismatch by removing the OEM TV app.
 
-## Compatibility gate for 0.1.8
+## Compatibility gate for 0.1.9
 
 The current installer has no list of retail SAM model names. Its `check_compatibility` function accepts a device only when **all** of these conditions pass:
 
-1. `ro.product.model` is exactly `R4`, `ro.build.version.release` is exactly `11`, and either `ro.hardware` or `ro.product.board` contains `2851` (case insensitive).
+1. `ro.product.model` is exactly `R4`, the Android version is `11` or newer, and either `ro.hardware` or `ro.product.board` contains `2851` (case insensitive). The Android check reads the numeric `ro.build.version.release` ("11", "12", "13", …; Android 12L also reports "12"); if a firmware reports a non-numeric release, it falls back to `ro.build.version.sdk` 30 or higher, the SDK level of Android 11.
 2. The installed `com.realtek.tv` APK returned by `pm path` has SHA-256 `6b2939ee1e30f2c13534692022831f843aa4f587eeee6991e5fbcf6340cad652`. The original `/system_ext/app/Tl_VirtualKey/Tl_VirtualKey.apk` has SHA-256 `3fb39f1da8b17967dddedb7c3828178201e1f474fc7ed097fe3da4111b88e73e`.
 3. `com.example.tl_virtualkey`, `com.realtek.menu`, and `com.google.android.tvlauncher` exist; `pm list libraries` contains `rtk-framework`; and `su 0 id` reports `uid=0(root)`.
+
+The exact APK hashes keep the normal path pinned to the tested Android 11 R4 firmware. On newer Android firmwares the installer relies on the same ADB surface used on Android 11: `cmd package set-home-activity`, `cmd package resolve-activity`, `cmd package uninstall-system-updates`, `pm enable/disable-user/default-state`, `settings`, and `am start-foreground-service` are all still present in current AOSP, and Android 12, 12L, 13, and later report numeric release versions, so the same commands apply.
 
 The code does **not** compare `ro.software.version_id` or check the SAM brand name. A successful normal check only establishes that these preconditions match; it does not prove the remote, HDMI switching, APK signature, or restore behavior on another physical TV. Installation also needs a readable Android ID and a resolvable current Home app so the backup can be tied to that TV. The experimental path below can try a different profile, but a successful user trial does not add that profile to the verified list without a separate firmware and recovery review.
 
 For a read-only check, prepare ADB on the candidate TV and run `python3 samtv.py check --serial TV_IP:5555` from a source checkout. This reads properties and installed packages and copies the two APKs into a temporary computer directory for hashing; it does not install anything on the TV. The normal setup wizard performs the same compatibility check before its final yes/no installation question. For public issue reports, request the model, Android version, and concise check result, never the APK files or a full trace.
 
-## Experimental trial on other Android 11 Realtek TVs
+## Experimental trial on other Android 11+ Realtek TVs
 
 An unfamiliar model can reach a **read-only discovery result** without being rejected merely because its model or board name differs. Discovery alone is not a working Home/HDMI test.
 
@@ -35,7 +37,7 @@ The installer provides `python3 samtv.py probe --serial TV_IP:5555` and a read-o
 The experimental path is implemented as these gates:
 
 1. **Discover:** read the model, Android version, board, software version, expected packages, `rtk-framework`, and root availability. No APK or setting changes.
-2. **Prerequisites:** require Android 11, the Realtek TV/VirtualKey/menu packages, Google Android TV Home, `rtk-framework`, ADB root, the original VirtualKey system APK at the known path, and a declared `HomeKeyReceiver`. The model, board and OEM APK hashes may differ from the R4 profile. A failed prerequisite stops before mutation.
+2. **Prerequisites:** require Android 11 or newer, the Realtek TV/VirtualKey/menu packages, Google Android TV Home, `rtk-framework`, ADB root, the original VirtualKey system APK at the known path, and a declared `HomeKeyReceiver`. The model, board, OEM APK hashes, and Android version may differ from the R4 profile. A failed prerequisite stops before mutation.
 3. **Prepare recovery:** download and verify APKs, copy the active TV and original VirtualKey APKs, save the current Home selection, receiver state, bridge settings, and versions of affected installed apps. Load and hash-check the just-created backup before changing the TV.
 4. **Trial:** install the bridge, mapped VirtualKey and selected launcher, select bridge Home, and disable the OEM Home receiver. Ask the user to test Home, HDMI with one OK, four-color, audio and picture using the physical remote. This is a functional test, but no other-board result has been observed by the maintainer.
 5. **Continue or restore:** `y` or Enter at the trial result question continues to optional shortcut installation. `n` or Esc, an interrupt, or an ADB error attempts `restore()` and verifies the previous Home/receiver/app versions. A rollback failure is reported with the backup path. The pre-existing manual Restore option remains available.
@@ -54,7 +56,7 @@ Automatic rollback is possible only while the TV boots and ADB remains reachable
 
 ## Public issue reports
 
-Ask for the model, Android version, chipset properties, the compatibility check result, and concise reproduction steps. Never request an APK dump or full `logcat` in a public issue. Make it clear that only TVs matching the two verified APK hashes and the other normal-install conditions above are verified; other Android 11 Realtek TVs can opt into the unverified experimental path.
+Ask for the model, Android version, chipset properties, the compatibility check result, and concise reproduction steps. Never request an APK dump or full `logcat` in a public issue. Make it clear that only TVs matching the two verified APK hashes and the other normal-install conditions above are verified; other Android 11-or-newer Realtek TVs can opt into the unverified experimental path.
 
 ## Installer and platform bundles
 

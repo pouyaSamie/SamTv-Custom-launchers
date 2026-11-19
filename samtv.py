@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAM TV Launcher 0.1.8 setup and recovery. Standard library only."""
+"""SAM TV Launcher 0.1.9 setup and recovery. Standard library only."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import hashlib
 import ipaddress
 import json
 import os
+import re
 from pathlib import Path
 import select
 import shutil
@@ -19,7 +20,10 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-VERSION = "0.1.8"
+VERSION = "0.1.9"
+MINIMUM_ANDROID_VERSION = 11
+# SDK 30 is Android 11; used when a firmware reports a non-numeric release.
+MINIMUM_ANDROID_SDK = 30
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 TESTED_REALTEK = "6b2939ee1e30f2c13534692022831f843aa4f587eeee6991e5fbcf6340cad652"
 TESTED_VIRTUALKEY = "3fb39f1da8b17967dddedb7c3828178201e1f474fc7ed097fe3da4111b88e73e"
@@ -153,6 +157,20 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def is_supported_android(device: "Device", release: str) -> bool:
+    """Accept Android 11 and every newer release, including 12L and later.
+
+    Consumer firmwares report a numeric ro.build.version.release ("11", "12",
+    "13", ...); Android 12L also reports "12". If a firmware reports a
+    non-numeric release, fall back to the SDK level (SDK 30 is Android 11).
+    """
+    leading = re.match(r"\s*(\d+)", release)
+    if leading:
+        return int(leading.group(1)) >= MINIMUM_ANDROID_VERSION
+    sdk = device.shell("getprop", "ro.build.version.sdk")
+    return sdk.isdigit() and int(sdk) >= MINIMUM_ANDROID_SDK
+
+
 def check_compatibility(device: Device, working: Path,
                         experimental: bool = False) -> tuple[Path, Path]:
     model = device.shell("getprop", "ro.product.model")
@@ -160,8 +178,9 @@ def check_compatibility(device: Device, working: Path,
     hardware = device.shell("getprop", "ro.hardware")
     board = device.shell("getprop", "ro.product.board")
     print(f"TV: {model}, Android {android}, {hardware} / {board}")
-    if android != "11":
-        raise SetupError("This installer requires Android 11. Nothing was installed.")
+    if not is_supported_android(device, android):
+        raise SetupError(
+            f"This installer requires Android {MINIMUM_ANDROID_VERSION} or newer. Nothing was installed.")
     if not experimental and (model != "R4" or "2851" not in (hardware + board).lower()):
         raise SetupError("This TV version has not been verified. Nothing was installed.")
     realtek = working / "RtkLiveTv.apk"
@@ -651,7 +670,7 @@ def main() -> int:
     parser.add_argument("--skip-projectivy", action="store_true")
     parser.add_argument("--install-ltv", action="store_true")
     parser.add_argument("--experimental", action="store_true",
-                        help="Run a reversible trial on an unverified Android 11 Realtek TV")
+                        help="Run a reversible trial on an unverified Android 11-or-newer Realtek TV")
     parser.add_argument("--apk-dir", type=Path, help="Use local verified APKs instead of downloading")
     args = parser.parse_args()
     if args.experimental and args.command != "install":
