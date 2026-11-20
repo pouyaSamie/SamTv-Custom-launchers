@@ -16,6 +16,8 @@ class FakeDevice:
     def __init__(self):
         self.home = "org.pouya.tvhomebridge/.LauncherRouterActivity"
         self.receiver = "disabled"
+        self.abi_list = "arm64-v8a,armeabi-v7a"
+        self.allow_home_change = True
         self.paths = {package: f"/data/app/{package}/base.apk" for package in samtv.BACKUP_PACKAGES}
         self.hashes = {}
         self.settings = {
@@ -46,11 +48,13 @@ class FakeDevice:
         self.commands.append(args)
         if args[:2] == ("su", "0"):
             args = args[2:]
+        if args == ("getprop", "ro.product.cpu.abilist"):
+            return self.abi_list
         if args == ("settings", "get", "secure", "android_id"):
             return "test-device-id"
         if args[:3] == ("cmd", "package", "resolve-activity"):
             return "priority=0\n" + self.home
-        if args[:3] == ("cmd", "package", "set-home-activity"):
+        if args[:3] == ("cmd", "package", "set-home-activity") and self.allow_home_change:
             self.home = args[3]
         if args[:2] == ("dumpsys", "package"):
             if self.receiver == "default":
@@ -351,6 +355,37 @@ class RestoreTests(unittest.TestCase):
         self.assertIn("com.leanbitlab.ltvL", device.paths)
         self.assertEqual(device.settings["tv_home_bridge_home_component"], samtv.PROJECTIVY_HOME)
         self.assertEqual(device.settings["tv_home_bridge_color_action"], "settings")
+
+    def test_bundled_ltv_is_rejected_on_64_bit_only_tv(self):
+        device = FakeDevice()
+        device.abi_list = "arm64-v8a"
+        del device.paths["com.leanbitlab.ltvL"]
+        with self.assertRaisesRegex(samtv.SetupError, "requires 32-bit ARM"):
+            samtv.required_apks(device, False, False, True, True)
+        self.assertNotIn("ltv", samtv.required_apks(device, False, False, True, False))
+
+    def test_trial_rolls_back_if_android_keeps_stock_home(self):
+        device = FakeDevice()
+        device.home = "com.google.android.tvlauncher/.MainActivity"
+        device.receiver = "default"
+        device.allow_home_change = False
+        with tempfile.TemporaryDirectory() as folder, patch.object(samtv, "ROOT", Path(folder)):
+            root = Path(folder)
+            original = root / "original.apk"
+            original.write_bytes(b"original")
+            with patch.object(samtv, "check_compatibility", return_value=(original, original)), \
+                 patch.object(samtv, "verify_bundle"), \
+                 patch.object(samtv, "save_restore_point"), \
+                 patch.object(samtv, "load_restore_point") as load_backup, \
+                 patch.object(samtv, "restore") as restore, \
+                 patch.object(device, "run"):
+                load_backup.side_effect = lambda _device: (
+                    next((root / "backups").iterdir()), {})
+                with self.assertRaisesRegex(samtv.SetupError, "Android did not select the Home bridge"):
+                    samtv.install(device, "en", False, False, False, False, root,
+                                  experimental=True)
+            restore.assert_called_once_with(device, "en")
+        self.assertEqual(device.receiver, "default")
 
     def test_restore_stock_state_removes_only_new_apps(self):
         device = FakeDevice()

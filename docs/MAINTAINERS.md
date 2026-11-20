@@ -1,4 +1,4 @@
-# Maintainer notes and release gate (0.1.9)
+# Maintainer notes and release gate (0.1.10)
 
 Back to [English README](../README.en.md).
 
@@ -14,7 +14,7 @@ The local `dist/` directory contains the four device-specific APKs plus the offi
 
 The bridge requires `START_ACTIVITIES_FROM_BACKGROUND` and `WRITE_SECURE_SETTINGS` to open its Home target and store launcher mappings on this firmware. It also uses `rtk-framework`, which is not part of the public Android SDK. The current APK was signed using a locally held AOSP platform test key matching this TV. That key must never be committed. A different TV firmware may use a different platform certificate, so an APK that works here may fail to install or to obtain required privileges elsewhere. Do not bypass a signature mismatch by removing the OEM TV app.
 
-## Compatibility gate for 0.1.9
+## Compatibility gate for 0.1.10
 
 The current installer has no list of retail SAM model names. Its `check_compatibility` function accepts a device only when **all** of these conditions pass:
 

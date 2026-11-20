@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAM TV Launcher 0.1.9 setup and recovery. Standard library only."""
+"""SAM TV Launcher 0.1.10 setup and recovery. Standard library only."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-VERSION = "0.1.9"
+VERSION = "0.1.10"
 MINIMUM_ANDROID_VERSION = 11
 # SDK 30 is Android 11; used when a firmware reports a non-numeric release.
 MINIMUM_ANDROID_SDK = 30
@@ -52,6 +52,7 @@ APK_URLS = {
     "ltv": "https://github.com/leanbitlab-org/LtvLauncher/releases/download/v2026.10.27/LTvLauncher-armeabi-v7a-release.apk",
 }
 HOME_RECEIVER = "com.realtek.tv/.receiver.HomeKeyReceiver"
+BRIDGE_HOME = "org.pouya.tvhomebridge/.LauncherRouterActivity"
 PROJECTIVY_HOME = "com.spocky.projengmenu/com.spocky.projengmenu.ui.home.MainActivity"
 LTV_HOME = "com.leanbitlab.ltvL/com.leanbitlab.ltvL.MainActivity"
 BACKUP_PACKAGES = (
@@ -246,8 +247,16 @@ def required_apks(device: Device, choose: bool, settings: bool,
     if projectivy and not device.package_path("com.spocky.projengmenu"):
         keys.append("projectivy")
     if ltv and not device.package_path("com.leanbitlab.ltvL"):
+        if not supports_bundled_ltv(device):
+            raise SetupError("The bundled LTvLauncher requires 32-bit ARM (armeabi-v7a). "
+                             "Continue without LTvLauncher. Nothing was installed.")
         keys.append("ltv")
     return keys
+
+
+def supports_bundled_ltv(device: Device) -> bool:
+    supported = device.shell("getprop", "ro.product.cpu.abilist")
+    return "armeabi-v7a" in supported.split(",")
 
 
 def verify_bundle(apk_dir: Path, keys: list[str]) -> None:
@@ -298,6 +307,12 @@ def device_identity(device: Device) -> str:
     return hashlib.sha256(android_id.encode("utf-8")).hexdigest()
 
 
+def resolve_home(device: Device) -> str:
+    result = device.shell("cmd", "package", "resolve-activity", "--brief",
+                          "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME")
+    return result.splitlines()[-1] if result else ""
+
+
 def home_receiver_state(device: Device) -> str:
     details = device.shell("dumpsys", "package", "com.realtek.tv")
     if "User 0:" not in details:
@@ -330,9 +345,7 @@ def save_restore_point(device: Device, backup: Path) -> None:
             digest = sha256(target)
         packages[package] = {"present": bool(source), "system_only": is_system_virtualkey,
                              "file": filename, "sha256": digest}
-    home = device.shell("cmd", "package", "resolve-activity", "--brief",
-                        "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME")
-    home = home.splitlines()[-1] if home else ""
+    home = resolve_home(device)
     if "/" not in home or "ResolverActivity" in home:
         raise SetupError("Cannot identify the current default Home app.")
     state = {
@@ -428,7 +441,10 @@ def install(device: Device, language: str, choose: bool, settings: bool,
                      home_target)
         device.shell("settings", "put", "global", "tv_home_bridge_color_action", "settings")
         device.shell("am", "start-foreground-service", "-n", "org.pouya.tvhomebridge/.KeyProbeService")
-        device.shell("cmd", "package", "set-home-activity", "org.pouya.tvhomebridge/.LauncherRouterActivity")
+        device.shell("cmd", "package", "set-home-activity", BRIDGE_HOME)
+        package, activity = BRIDGE_HOME.split("/")
+        if resolve_home(device) not in (BRIDGE_HOME, f"{package}/{package}{activity}"):
+            raise SetupError("Android did not select the Home bridge.")
         if home_receiver_state(device) != "disabled":
             device.shell("su", "0", "pm", "disable-user", "--user", "0", HOME_RECEIVER)
         if home_receiver_state(device) != "disabled":
@@ -491,9 +507,7 @@ def restore(device: Device, language: str) -> None:
     for package in BACKUP_PACKAGES[:-1]:
         if not packages[package]["present"] and device.package_path(package):
             device.shell("pm", "uninstall", package)
-    current_home = device.shell("cmd", "package", "resolve-activity", "--brief",
-                                "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME")
-    if not current_home.splitlines() or current_home.splitlines()[-1] != state["home_activity"]:
+    if resolve_home(device) != state["home_activity"]:
         raise SetupError("Restore is incomplete: the previous Home app is not selected.")
     if home_receiver_state(device) != receiver:
         raise SetupError("Restore is incomplete: the Home button receiver differs.")
@@ -636,8 +650,13 @@ def setup(language: str) -> None:
     settings = prompt_yes(language, "میان‌بر TV Settings نصب شود؟", "Install the TV Settings shortcut?")
     projectivy = prompt_yes(language, "لانچر Projectivy نصب و پیش‌فرض شود؟ (پیشنهادی)",
                            "Install and select Projectivy Launcher? (recommended)")
-    ltv = prompt_yes(language, "لانچر LTvLauncher هم نصب شود؟",
-                     "Also install LTvLauncher?")
+    ltv = False
+    if device.package_path("com.leanbitlab.ltvL") or supports_bundled_ltv(device):
+        ltv = prompt_yes(language, "لانچر LTvLauncher هم نصب شود؟",
+                         "Also install LTvLauncher?")
+    else:
+        say(language, "نسخهٔ همراه LTvLauncher به ARM ۳۲ بیتی نیاز دارد و نصب نمی‌شود.",
+            "Skipping LTvLauncher: the bundled app requires 32-bit ARM.")
     say(language,
         "هشدار: نصب، تنظیم دکمه‌ها و صفحهٔ خانه را تغییر می‌دهد. نسخهٔ پشتیبان پیش از تغییر ذخیره می‌شود، اما بازیابی فقط تا زمانی ممکن است که تلویزیون روشن شود و ADB در دسترس باشد. اگر آزمون دکمه‌ها موفق نبود، از همین پوشه گزینهٔ بازیابی را اجرا کنید.",
         "Warning: installation changes Home and remote-button behavior. A backup is saved first, but restore requires the TV to boot and ADB to remain available. If the button test fails, run Restore from this folder.")

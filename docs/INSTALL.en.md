@@ -4,7 +4,7 @@
 
 Follow this guide on the TV and a computer. With the recommended choices, **Home** opens Projectivy, **Source/Input** still switches HDMI, and the remote's **four colored dots** open the TV settings menu.
 
-Version **0.1.9** accepts **Android 11 and newer**, including the current Android TV OS 16, in its Android-version check. It has been tested only on the **SAM R4 running Android 11** with matching TV software. The name R4 alone is not enough; the installer checks required software too. On a different model, board, or Android version, you can run **Read-only discovery** first and then choose **Experimental trial** if you accept the risk. This path has not been field-tested on another model or Android version. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-019) are in the technical notes.
+Version **0.1.10** accepts **Android 11 and newer**, including the current Android TV OS 16, in its Android-version check. It has been tested only on the **SAM R4 running Android 11** with matching TV software. The name R4 alone is not enough; the installer checks required software too. On a different model, board, or Android version, you can run **Read-only discovery** first and then choose **Experimental trial** if you accept the risk. This path has not been field-tested on another model or Android version. The [exact conditions](MAINTAINERS.md#compatibility-gate-for-0110) are in the technical notes.
 
 ## 1. Prepare the TV
 
@@ -28,12 +28,12 @@ In the TV's settings, open **Network**, **Wi-Fi**, or **Ethernet**, depending on
 
 ## 2. Run the installer on your computer
 
-1. Download **one** file for your computer from the [v0.1.9 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.9): [Windows ZIP](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.9/SAM-TV-v0.1.9-windows.zip) or [Linux TAR.GZ](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.9/SAM-TV-v0.1.9-linux.tar.gz). You do not need the individual APK files.
+1. Download **one** file for your computer from the [v0.1.10 release](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/tag/v0.1.10): [Windows ZIP](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.10/SAM-TV-v0.1.10-windows.zip) or [Linux TAR.GZ](https://github.com/pouyaSamie/SamTv-Custom-launchers/releases/download/v0.1.10/SAM-TV-v0.1.10-linux.tar.gz). You do not need the individual APK files.
 2. **Extract** the downloaded file. Do not run the installer while it is still inside the archive.
 3. On **Windows**, open the extracted folder and double-click `Install-SAM-TV.cmd`. On **Linux**, open the extracted folder and run `Install-SAM-TV`. If your Linux file manager does not offer **Run**, open a terminal in that folder and enter `./Install-SAM-TV`.
 4. The installer is in English. Press **Enter** at the normal-setup question, then enter the TV's IP address. For read-only discovery, press **`n`** or **Esc** at each of the three questions: normal setup, experimental trial, and restore.
 5. Watch the TV. If it asks whether to allow **USB debugging** from this computer, choose **Allow** with the remote. The installer checks the TV's compatibility before it changes anything. If it reports that the model or software is not supported, stop.
-6. For the recommended setup, press **Enter** at each of the next four questions. This includes **Choose Home**, **TV Settings**, **Projectivy**, and **LTvLauncher**; Projectivy becomes Home. **Remote Buttons** is installed automatically. To skip LTvLauncher, press **`n`** or **Esc** at its question. Read the warning. Press **`y`** or **Enter** to start installation; **`n`** or **Esc** cancels.
+6. For the recommended setup, press **Enter** at each app question. Choose Home, TV Settings, and Projectivy are selected, and Projectivy becomes Home. **Remote Buttons** is installed automatically. The wizard also offers LTvLauncher if the TV supports 32-bit ARM apps or already has it installed. Press **`n`** or **Esc** at its question to skip it. Read the warning, then press **`y`** or **Enter** to start installation, or **`n`** or **Esc** to cancel.
 7. Wait for **“Installation completed”**. The installer downloads and checks the selected apps, saves a copy of the previous setup, and then installs them. If it reports an error, read [If something goes wrong](#if-something-goes-wrong) before trying again.
 
 **Keep the entire extracted folder.** The installer saves the recovery copy in its `backups` folder. You need that same folder if you later restore your previous setup. The backup belongs to your TV, so do not share it.
